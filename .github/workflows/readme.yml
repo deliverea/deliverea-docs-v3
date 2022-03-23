@@ -13,10 +13,10 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v3
 
-      # Run GitHub Action to sync OpenAPI file at [swagger.yml]
+      # Run GitHub Action to sync OpenAPI file at [path-to-file.json]
       - name: GitHub Action
         # We recommend specifying a fixed version, i.e. @7.0.1
         # Docs: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
         uses: readmeio/rdme@7.0.1
         with:
-          rdme: openapi [swagger.yml] --key=${{ secrets.README_API_KEY }} --id=${{ secrets.README_API_DEFINITION_ID }}
+          rdme: openapi swagger.yml --key=${{ secrets.README_API_KEY }} --id=${{ secrets.README_API_DEFINITION_ID }}
