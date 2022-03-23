@@ -5,14 +5,8 @@ info:
   title: Deliverea API
 
 servers:
-  - url: http://localhost:8091
-    description: Local environment
-  - url: https://api.deliverea.com
-    description: Production environment
   - url: https://api.sandbox.deliverea.com
     description: Sandbox environment
-  - url: https://api.staging.deliverea.com
-    description: Staging environment
 
 
 ########################
@@ -26,7 +20,7 @@ paths:
         - DistributionCenters
       security:
         - basicAuth: []
-      summary: List distribution centers
+      summary: List Distribution centers
       responses:
         200:
           $ref: '#/components/responses/ListDistributionCentersResponse'
