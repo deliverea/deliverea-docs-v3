@@ -10,6 +10,14 @@
         <div id="swagger-ui"></div> <!-- Div to hold the UI component -->
         <script>
             window.onload = function () {
+                const HideInfoUrlPartsPlugin = () => {
+                  return {
+                    wrapComponents: {
+                      InfoUrl: () => () => null
+                    }
+                  }
+                }
+                
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
                     url: "swagger.yml", //Location of Open API spec in the repo
@@ -20,6 +28,8 @@
                         SwaggerUIBundle.SwaggerUIStandalonePreset
                     ],
                     plugins: [
+                       SwaggerUIBundle.plugins.DownloadUrl,
+                       HideInfoUrlPartsPlugin    
                     ],
                 })
                 window.ui = ui
