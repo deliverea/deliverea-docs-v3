@@ -5,8 +5,14 @@ info:
   title: Deliverea API
 
 servers:
+  - url: http://localhost:8091
+    description: Local environment
+  - url: https://api.deliverea.com
+    description: Production environment
   - url: https://api.sandbox.deliverea.com
     description: Sandbox environment
+  - url: https://api.staging.deliverea.com
+    description: Staging environment
 
 
 ########################
@@ -20,7 +26,7 @@ paths:
         - DistributionCenters
       security:
         - basicAuth: []
-      summary: List Distribution centers
+      summary: List distribution centers
       responses:
         200:
           $ref: '#/components/responses/ListDistributionCentersResponse'
@@ -181,7 +187,7 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   ### Cost Centers ###
-  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/costCenters:
+  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers:
     post:
       tags:
         - Cost Centers
@@ -249,7 +255,7 @@ paths:
           $ref: '#/components/responses/ListCostCentersResponse'
 
 
-  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/costCenters/{costCenter}:
+  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers/{costCenter}:
     get:
       tags:
         - Cost Centers
@@ -314,7 +320,7 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/costCenters/{costCenter}/services/{serviceCode}/activate:
+  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers/{costCenter}/services/{serviceCode}/activate:
     patch:
       tags:
         - Cost Centers
@@ -352,7 +358,7 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/costCenters/{costCenter}/services/{serviceCode}/deactivate:
+  /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers/{costCenter}/services/{serviceCode}/deactivate:
     patch:
       tags:
         - Cost Centers
@@ -1241,6 +1247,217 @@ paths:
                         description: No rules matched for this expedition
                         example: No rules matched for this expedition
 
+  ### RWP ###
+  /v3/returns-portal/{distributionCenterId}:
+    post:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: [ ]
+      summary: Configure Returns Web Portal
+      requestBody:
+        $ref: '#/components/requestBodies/ReturnsWebPortalConfigurationRequest'
+      responses:
+        201:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        400:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        409:
+          $ref: '#/components/responses/SubdomainAlreadyTaken'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+    get:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: [ ]
+      summary: Get Returns Web Portal configuration
+      responses:
+        200:
+          $ref: '#/components/responses/ReturnsWebPortalConfigurationResponse'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /v3/returns-portal/{distributionCenterId}/logo:
+    post:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                logo:
+                  type: string
+                  format: binary
+      security:
+        - basicAuth: [ ]
+      summary: Upload Returns Web Portal Logo
+      responses:
+        201:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /v3/returns-portal/{distributionCenterId}/activate:
+    patch:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: [ ]
+      summary: Activates Returns Web Portal
+      responses:
+        200:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
+  /v3/returns-portal/{distributionCenterId}/deactivate:
+    patch:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: [ ]
+      summary: Deactivates Returns Web Portal
+      responses:
+        200:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
+  ### TRACKINGS WEBHOOK ###
+  /v3/trackings-webhook/{distributionCenterId}:
+    post:
+      tags:
+        - TrackingsWebhook
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Configure Trackings Webhook
+      requestBody:
+        $ref: '#/components/requestBodies/TrackingsWebhookConfigurationRequest'
+      responses:
+        201:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        400:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+    get:
+      tags:
+        - TrackingsWebhook
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Get Trackings Webhook configuration
+      responses:
+        200:
+          $ref: '#/components/responses/TrackingsWebhookConfigurationResponse'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+
+  /v3/trackings-webhook/{distributionCenterId}/activate:
+    patch:
+      tags:
+        - TrackingsWebhook
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Activates Trackings Webhook
+      responses:
+        200:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
+  /v3/trackings-webhook/{distributionCenterId}/deactivate:
+    patch:
+      tags:
+        - TrackingsWebhook
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Deactivates Trackings Webhook
+      responses:
+        200:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
+
 components:
   securitySchemes:
     basicAuth:
@@ -1260,6 +1477,8 @@ components:
               - status
               - name
               - address
+              - zipCode
+              - city
               - phone
               - email
             properties:
@@ -1275,6 +1494,16 @@ components:
                 type: string
                 description: Full address including street, mumber, floor and door
                 example: Diagonal 25, 2 floor 1st
+              city:
+                type: string
+                nullable: false
+                description: Municipality
+                example: 'Barcelona'
+              zipCode:
+                type: string
+                nullable: false
+                description: Postal code of the municipality
+                example: '08005'
               countryCode:
                 type: string
                 nullable: true
@@ -1351,6 +1580,22 @@ components:
           schema:
             allOf:
               - $ref: '#/components/schemas/AdvancedTrackingConfiguration'
+
+    ReturnsWebPortalConfigurationRequest:
+      description: 'Returns Web Portal configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
+
+    TrackingsWebhookConfigurationRequest:
+      description: 'Returns Web Portal configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
 
     OrderRequest:
       description: 'Order creation request'
@@ -1722,6 +1967,44 @@ components:
                         nullable: true
                         description: 'Logo url'
                         example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+
+    ### RWP ###
+    ReturnsWebPortalConfigurationResponse:
+      description: 'Returns Web Portal configuration response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                allOf:
+                  - properties:
+                      distributionCenterId:
+                        type: string
+                        description: 'Distribution center identifier'
+                        example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
+                  - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
+                  - properties:
+                      logo:
+                        type: string
+                        format: url
+                        nullable: true
+                        description: 'Logo url'
+                        example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+
+    TrackingsWebhookConfigurationResponse:
+      description: 'Trackings webhook configuration response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                allOf:
+                  - properties:
+                      distributionCenterId:
+                        type: string
+                        description: 'Distribution center identifier'
+                        example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
+                  - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
 
     ### Orders, shipments and returns ###
     CreateOrderResponse:
@@ -2296,6 +2579,16 @@ components:
           type: string
           description: Full address including street, mumber, floor and door
           example: Diagonal 25, 2 floor 1st
+        city:
+          type: string
+          nullable: false
+          description: Municipality
+          example: 'Barcelona'
+        zipCode:
+          type: string
+          nullable: false
+          description: Postal code of the municipality
+          example: '08005'
         countryCode:
           type: string
           nullable: true
@@ -2337,7 +2630,7 @@ components:
     Carrier:
       type: object
       properties:
-        carrierCode:
+        code:
           type: string
           description: Unique code identifier of the carrier (usually carrier name snakeCase)
           example: dummy
@@ -2373,14 +2666,10 @@ components:
     Service:
       type: object
       properties:
-        serviceCode:
+        code:
           type: string
           description: Identifier code of the servie in Deliverea's systems
           example: correos-10
-        carrierCode:
-          type: string
-          description: Identifier code of the carrier in Deliverea's systems
-          example: correosExpress
         type:
           type: string
           enum:
@@ -2423,7 +2712,7 @@ components:
           format: email
           nullable: true
           description: 'Support email that will be displayed in the advanced tracking communications'
-          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
+          example: support@mydomain.com
         emailNotifications:
           type: array
           items:
@@ -2447,6 +2736,107 @@ components:
             'ready_to_deliver',
             'deposited_in_drop_point'
           ]
+
+    ReturnsWebPortalConfiguration:
+      type: object
+      properties:
+        status:
+          type: boolean
+          nullable: false
+          description: 'Active or not'
+          example: true
+        subdomain:
+          type: string
+          nullable: true
+          description: 'Advanced tracking webportal subdomain (https://mysubdomain.trackorder.io)'
+          example: 'mysubdomain'
+        color:
+          type: string
+          nullable: true
+          description: 'Hexadecimal code color'
+          example: '#D62424'
+        senderId:
+          type: string
+          description: 'Sender email identifier that will be the sender of the advanced tracking communications'
+          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
+        notificationEmail:
+          type: string
+          format: email
+          nullable: true
+          description: Email that will be CC'd when a return es created
+          example: support@mydomain.com
+        notificationOn:
+          type: boolean
+          nullable: false
+          description: Activate/deactivate CC'ing the notification email
+          example: true
+        pickupCarrier:
+          type: string
+          nullable: true
+          description: Carrier that will be used when the client creates a home pickup return
+          example: correosExpress
+        pickupService:
+          type: string
+          nullable: true
+          description: Service that will be used when the client creates a home pickup return
+          example: correos-24
+        officeCarrier:
+          type: string
+          nullable: true
+          description: Carrier that will be used when the client creates a home drop in office  return
+          example: correos
+        officeService:
+          type: string
+          nullable: true
+          description: Service that will be used when the client creates drop in office return
+          example: S0132
+        policyDays:
+          type: number
+          nullable: false
+          default: 15
+          description: Peiod in days when the client will be able to demand a return
+          example: 15
+        policyUrl:
+          type: string
+          nullable: true
+          format: url
+          description: Link to return policies information
+          example: https://mydomain.com/return-policy
+        exitLink:
+          type: string
+          nullable: true
+          format: url
+          description: Link where the customer will be redirected after the return demand is completed
+          example: https://mydomain.com/exit-link
+
+    TrackingsWebhookConfiguration:
+      type: object
+      properties:
+        status:
+          type: boolean
+          nullable: false
+          description: 'Active or not'
+          example: true
+        credentials:
+          type: object
+          properties:
+            user:
+              type: string
+              nullable: false
+              description: Basic auth username of the webhook provided
+              example: 'username'
+            password:
+              type: string
+              nullable: false
+              description: Basic auth password of the webhook provided
+              example: 'password'
+        url:
+          type: string
+          nullable: false
+          format: url
+          description: Endpoint the tracking updates will be posted to
+          example: https://mydomain.com/my-trackings-webhook
+
 
     Shipment:
       type: object
