@@ -1,126 +1,276 @@
 openapi: 3.0.0
 info:
-  description: Delivera API documentation
+  description: Deliverea API documentation
   version: '3.0'
   title: Deliverea API
 
 servers:
+  - url: https://api.deliverea.com
+    description: Production environment
   - url: https://api.sandbox.deliverea.com
     description: Sandbox environment
 
-
-########################
-# ENDPOINTS
-########################
-
 paths:
-  /v3/distribution-centers:
-    get:
-      tags:
-        - DistributionCenters
-      security:
-        - basicAuth: []
-      summary: List distribution centers
-      responses:
-        200:
-          $ref: '#/components/responses/ListDistributionCentersResponse'
-
+  /v3/distribution-centers/{distributionCenterId}/advanced-tracking:
     post:
       tags:
-        - DistributionCenters
-      security:
-        - basicAuth: []
-      summary: Create a distribution center
-      requestBody:
-        $ref: '#/components/requestBodies/DistributionCenterRequest'
-      responses:
-        201:
-          description: Created
-        400:
-          $ref: '#/components/responses/MissingOrInvalidFields'
-
-  /v3/distribution-centers/{distributionCenterId}:
-    get:
-      tags:
-        - DistributionCenters
+        - AdvancedTracking
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: Get distribution center by id
+          description: 'Distribution Center identifier'
       security:
-        - basicAuth: []
-      summary: Get a distribution center
+        - basicAuth: [ ]
+      summary: Configure Advanced Tracking
+      requestBody:
+        $ref: '#/components/requestBodies/AdvancedTrackingConfigurationRequest'
       responses:
-        200:
-          $ref: '#/components/responses/GetDistributionCenterResponse'
-        404:
-          $ref: '#/components/responses/NotFound'
+        201:
+          description: 'Created'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        409:
+          $ref: '#/components/responses/SubdomainAlreadyTaken'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
 
     put:
       tags:
-        - DistributionCenters
+        - AdvancedTracking
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: Distribution center unique uuid identifier
+          description: 'Distribution Center identifier'
       security:
         - basicAuth: []
-      summary: Edita a distribution center
+      summary: Configure Advanced Tracking
       requestBody:
-        $ref: '#/components/requestBodies/DistributionCenterRequest'
+        $ref: '#/components/requestBodies/AdvancedTrackingConfigurationRequest'
       responses:
-        200:
-          description: Updated
+        204:
+          description: 'Updated'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        409:
+          $ref: '#/components/responses/SubdomainAlreadyTaken'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
 
-  /v3/distribution-centers/{distributionCenterId}/activate:
-    patch:
+    get:
       tags:
-        - DistributionCenters
+        - AdvancedTracking
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: Distribution center unique uuid identifier
+          description: 'Distribution Center identifier'
       security:
         - basicAuth: []
-      summary: Activate a distribution center
+      summary: Get Advanced Tracking configuration
       responses:
         200:
-          description: Accepted
+          $ref: '#/components/responses/AdvancedTrackingConfigurationResponse'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
 
-  /v3/distribution-centers/{distributionCenterId}/deactivate:
-    patch:
+  /v3/distribution-centers/{distributionCenterId}/advanced-tracking/logo:
+    post:
       tags:
-        - DistributionCenters
+        - AdvancedTracking
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: Distribution center unique uuid identifier
+          description: 'Distribution Center identifier'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                logo:
+                  type: string
+                  format: binary
       security:
         - basicAuth: []
-      summary: Deactivate a distribution center
+      summary: Upload Advanced Tracking Logo
+      responses:
+        201:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /v3/distribution-centers/{distributionCenterId}/advanced-tracking/activate:
+    patch:
+      tags:
+        - AdvancedTracking
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Activates Advanced Tracking
       responses:
         200:
-          description: Accepted
+          description: 'OK'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
-  ### CARRIERS ###
+  /v3/distribution-centers/{distributionCenterId}/advanced-tracking/deactivate:
+    patch:
+      tags:
+        - AdvancedTracking
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Deactivates Advanced Tracking
+      responses:
+        200:
+          description: 'OK'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
+
+  /v3/billing-accounts:
+    get:
+      tags:
+        - BillingAccounts
+      security:
+        - basicAuth: []
+      summary: List billing accounts
+      responses:
+        200:
+          $ref: '#/components/responses/ListBillingAccountResponse'
+    post:
+      tags:
+        - BillingAccounts
+      security:
+        - basicAuth: []
+      summary: Create a new billing account
+      requestBody:
+        $ref: '#/components/requestBodies/BillingAccountRequest'
+      responses:
+        201:
+          description: "CREATED"
+          headers:
+            content-location:
+              description: Uri for the new created object
+              schema:
+                type: string
+              example: /v3/billing-accounts/49030f12-79e6-4e1f-9e3d-b3f6774d742b
+            content-uuid:
+              description: Uuid for the new created object
+              schema:
+                type: string
+                format: uuid
+
+  /v3/billing-accounts/{billingAccountId}:
+    parameters:
+      - in: path
+        name: billingAccountId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - BillingAccounts
+      security:
+        - basicAuth: []
+      summary: Retrieve a billing acount by it's id
+      responses:
+        200:
+          $ref: '#/components/responses/BillingAccountResponse'
+        404:
+          description: Not found
+    put:
+      summary: Update a billing account
+      description: Performs full update in given billing account
+      tags:
+        - BillingAccounts
+      security:
+        - basicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/BillingAccountRequest'
+      responses:
+        204:
+          description: Ok, billing account has been updated
+        404:
+          description: Not found
+
+  /v3/billing-accounts/{billingAccountId}/activate:
+    patch:
+      tags:
+        - BillingAccounts
+      parameters:
+        - in: path
+          name: billingAccountId
+          schema:
+            type: string
+          required: true
+          description: Billing account unique uuid identifier
+      security:
+        - basicAuth: [ ]
+      summary: Activate a billing account
+      responses:
+        200:
+          description: Accepted
+        404:
+          description: Not found
+
+  /v3/billing-accounts/{billingAccountId}/deactivate:
+    patch:
+      tags:
+        - BillingAccounts
+      parameters:
+        - in: path
+          name: billingAccountId
+          schema:
+            type: string
+          required: true
+          description: Billing account unique uuid identifier
+      security:
+        - basicAuth: [ ]
+      summary: Deactivate a billing account
+      responses:
+        200:
+          description: Accepted
+        404:
+          description: Not found
+        409:
+          description: Conflict, the billing account has distribution centers assigned
+
+
   /v3/carriers:
     get:
       tags:
@@ -179,6 +329,7 @@ paths:
                       $ref: '#/components/schemas/credentialField'
         404:
           $ref: '#/components/responses/NotFound'
+
 
   ### Cost Centers ###
   /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers:
@@ -390,129 +541,112 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-  ### ADVANCED TRACKING ###
-  /v3/advanced-tracking/{distributionCenterId}:
-    post:
-      tags:
-        - AdvancedTracking
-      parameters:
-        - in: path
-          name: distributionCenterId
-          schema:
-            type: string
-          required: true
-          description: 'Distribution Center identifier'
-      security:
-        - basicAuth: []
-      summary: Configure Advanced Tracking
-      requestBody:
-        $ref: '#/components/requestBodies/AdvancedTrackingConfigurationRequest'
-      responses:
-        201:
-          description: 'OK'
-        403:
-          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        400:
-          $ref: '#/components/responses/MissingOrInvalidFields'
-        409:
-          $ref: '#/components/responses/SubdomainAlreadyTaken'
-        500:
-          $ref: '#/components/responses/UnexpectedError'
-
+  /v3/distribution-centers:
     get:
       tags:
-        - AdvancedTracking
-      parameters:
-        - in: path
-          name: distributionCenterId
-          schema:
-            type: string
-          required: true
-          description: 'Distribution Center identifier'
+        - DistributionCenters
       security:
         - basicAuth: []
-      summary: Get Advanced Tracking configuration
+      summary: List distribution centers
       responses:
         200:
-          $ref: '#/components/responses/AdvancedTrackingConfigurationResponse'
-        403:
-          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        500:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: '#/components/responses/ListDistributionCentersResponse'
 
-  /v3/advanced-tracking/{distributionCenterId}/logo:
     post:
       tags:
-        - AdvancedTracking
-      parameters:
-        - in: path
-          name: distributionCenterId
-          schema:
-            type: string
-          required: true
-          description: 'Distribution Center identifier'
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                logo:
-                  type: string
-                  format: binary
+        - DistributionCenters
       security:
         - basicAuth: []
-      summary: Upload Advanced Tracking Logo
+      summary: Create a distribution center
+      requestBody:
+        $ref: '#/components/requestBodies/DistributionCenterRequest'
       responses:
         201:
-          description: 'OK'
-        403:
-          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        500:
-          $ref: '#/components/responses/UnexpectedError'
+          description: Created
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
 
-  /v3/advanced-tracking/{distributionCenterId}/activate:
-    patch:
+  /v3/distribution-centers/{distributionCenterId}:
+    get:
       tags:
-        - AdvancedTracking
+        - DistributionCenters
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: 'Distribution Center identifier'
+          description: Get distribution center by id
       security:
         - basicAuth: []
-      summary: Activates Advanced Tracking
+      summary: Get a distribution center
       responses:
         200:
-          description: 'OK'
-        403:
-          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+          $ref: '#/components/responses/GetDistributionCenterResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
 
-  /v3/advanced-tracking/{distributionCenterId}/deactivate:
-    patch:
+    put:
       tags:
-        - AdvancedTracking
+        - DistributionCenters
       parameters:
         - in: path
           name: distributionCenterId
           schema:
             type: string
           required: true
-          description: 'Distribution Center identifier'
+          description: Distribution center unique uuid identifier
       security:
         - basicAuth: []
-      summary: Deactivates Advanced Tracking
+      summary: Edita a distribution center
+      requestBody:
+        $ref: '#/components/requestBodies/DistributionCenterRequest'
       responses:
         200:
-          description: 'OK'
+          description: Updated
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
+  /v3/distribution-centers/{distributionCenterId}/activate:
+    patch:
+      tags:
+        - DistributionCenters
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: Distribution center unique uuid identifier
+      security:
+        - basicAuth: []
+      summary: Activate a distribution center
+      responses:
+        200:
+          description: Accepted
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
-  ### ORDERS ###
+  /v3/distribution-centers/{distributionCenterId}/deactivate:
+    patch:
+      tags:
+        - DistributionCenters
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: Distribution center unique uuid identifier
+      security:
+        - basicAuth: []
+      summary: Deactivate a distribution center
+      responses:
+        200:
+          description: Accepted
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+
   /v3/orders:
     post:
       tags:
@@ -525,14 +659,12 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/CreateOrderResponse'
-        400:
+        422:
           $ref: '#/components/responses/MissingOrInvalidFields'
         401:
-          $ref: '#/components/responses/ApiUserOrkeyInvalid'
+          $ref: '#/components/responses/ApiUserOrKeyInvalid'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        422:
-          $ref: '#/components/responses/UnprocessableEntity'
         500:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -544,11 +676,103 @@ paths:
       summary: Search orders by criteria
       parameters:
         - in: query
-          name: filters
+          name: carrierCode
           schema:
-            $ref: '#/components/schemas/OrderCriteria'
+            type: string
+          description: Carrier used when creating the shipment
+          example: dummy
+        - in: query
+          name: serviceCode
+          schema:
+            type: string
+          description: Service used when creating the shipment
+          example: standard
+        - in: query
+          name: costCenterCode
+          schema:
+            type: string
+          description: Alias identifier of the cost center
+          example: DEFAULT
+        - in: query
+          name: clientReference
+          schema:
+            type: string
+          description: Filter by exact clientReference
+          example: REF0123456789
+        - in: query
+          name: delivereaReference
+          description: Filter by exact delivereaReference
+          schema:
+            type: string
+          example: D5312427d7f72b0
+        - in: query
+          name: parcelClientCode
+          schema:
+            type: string
+          description: Filter by exact parcelClientCode
+          example: 100597501
+        - in: query
+          name: dropPointKey
+          schema:
+            type: string
+          description: Filter by drop point key
+          example: DP123456789
+        - in: query
+          name: countryCode
+          schema:
+            type: string
+          description: Destination country code for shipment expeditions or origin country code for return expedition
+          example: ES
+        - in: query
+          name: fromShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: From shipping date starting at
+        - in: query
+          name: toShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: To shipping date ending at
+        - in: query
+          name: statuses[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/OrderStatus'
+          description: Order statuses to filter
+          example: ['draft','pending']
+        - in: query
+          name: distributionCenterIds[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Uuid'
           style: deepObject
           explode: true
+          description: Uuids of the distribution centers to filter
+          example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+        - in: query
+          name: fromCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date starting at
+        - in: query
+          name: toCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date ending at
+        - in: query
+          name: distributionCenterCountryCode
+          schema:
+            type: string
+          description: Filter by distribution center's country
+          example: ES
+        - in: query
+          name: billingAccountId
+          schema:
+            type: string
+          description: Filter by billing account
+          example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
         - in: query
           name: page
           schema:
@@ -589,7 +813,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
 
 
-  /v3/orders/{delivereaReference}/{parcelCode}/{parcelNumber}/label:
+  /v3/orders/{delivereaReference}/{parcelClientCode}/{parcelNumber}/label:
     get:
       tags:
         - Orders
@@ -601,7 +825,7 @@ paths:
           required: true
           description: 'Deliverea reference'
         - in: path
-          name: parcelCode
+          name: parcelClientCode
           schema:
             type: string
           required: true
@@ -652,6 +876,9 @@ paths:
       security:
         - basicAuth: []
       summary: Update an order
+      description: "Edit the data of a previously created order. To be noted: \n
+      - When the parcels array is modified (either by editing, adding or deleting a parcel) all previous parcels must be resent in the request, even if they are not being modified. This is because tht PUT operation overrides the whole parcels array. The same logic applies to the parcels.*.items arrays.\n
+      - Distribution center and assignation (carrierCode, serviceCode and costCenterCode) parameters, either explicitly informed or implicitly calculated by the rules, can not be updated. In case these parameters need to be change, the order should be deleted and re-created."
       parameters:
         - in: path
           name: delivereaReference
@@ -664,14 +891,12 @@ paths:
       responses:
         204:
           description: Updated
-        400:
+        422:
           $ref: '#/components/responses/MissingOrInvalidFields'
         401:
-          $ref: '#/components/responses/ApiUserOrkeyInvalid'
+          $ref: '#/components/responses/ApiUserOrKeyInvalid'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        422:
-          $ref: '#/components/responses/UnprocessableEntity'
         500:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -708,14 +933,12 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/CreateShipmentResponse'
-        400:
-          $ref: '#/components/responses/CarrierDocumentationError'
         401:
-          $ref: '#/components/responses/ApiUserOrkeyInvalid'
+          $ref: '#/components/responses/ApiUserOrKeyInvalid'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
         422:
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/MissingOrInvalidFieldsOrCarrierDocumentationError'
         500:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -727,11 +950,137 @@ paths:
       summary: Search shipments by criteria
       parameters:
         - in: query
-          name: filters
+          name: carrierCode
           schema:
-            $ref: '#/components/schemas/ShipmentCriteria'
+            type: string
+          description: Carrier used when creating the shipment
+          example: dummy
+        - in: query
+          name: serviceCode
+          schema:
+            type: string
+          description: Service used when creating the shipment
+          example: standard
+        - in: query
+          name: costCenterCode
+          schema:
+            type: string
+          description: Alias identifier of the cost center
+          example: DEFAULT
+        - in: query
+          name: clientReference
+          schema:
+            type: string
+          description: Filter by exact clientReference
+          example: REF0123456789
+        - in: query
+          name: carrierReference
+          description: Unique carrier reference
+          schema:
+            type: string
+          example: CAR987654321
+        - in: query
+          name: delivereaReference
+          description: Filter by exact delivereaReference
+          schema:
+            type: string
+          example: D5312427d7f72b0
+        - in: query
+          name: parcelClientCode
+          schema:
+            type: string
+          description: Filter by exact parcelClientCode
+          example: 100597501
+        - in: query
+          name: toName
+          schema:
+            type: string
+          description: Name of the recipient (like)
+          example: 'John D'
+        - in: query
+          name: toZipCode
+          schema:
+            type: string
+          description: Destination zip code
+          example: 08005
+        - in: query
+          name: toCountryCode
+          schema:
+            type: string
+          description: Destination country code
+          example: ES
+        - in: query
+          name: dropPointKey
+          schema:
+            type: string
+          description: Filter by drop point key
+          example: DP123456789
+        - in: query
+          name: cashOnDelivery
+          schema:
+            type: number
+            enum:
+              [0,1]
+          description: Wether or not the expedition includes cash on delivery (truthy/falsy type boolean)
+          example: 1
+        - in: query
+          name: fromShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: From shipping date starting at
+        - in: query
+          name: toShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: To shipping date ending at
+        - in: query
+          name: statuses[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Status'
+          description: Shipment statuses to filter
+          example: ['active','finalized']
+        - in: query
+          name: currentTrackingCodes[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TrackingCodes'
+          description: Filter by tracking codes
+          example: ['11']
+        - in: query
+          name: distributionCenterIds[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Uuid'
           style: deepObject
           explode: true
+          description: Uuids of the distribution centers to filter
+          example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+        - in: query
+          name: fromCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date starting at
+        - in: query
+          name: toCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date ending at
+        - in: query
+          name: distributionCenterCountryCode
+          schema:
+            type: string
+          description: Filter by distribution center's country
+          example: ES
+        - in: query
+          name: billingAccountId
+          schema:
+            type: string
+          description: Filter by billing account
+          example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
         - in: query
           name: page
           schema:
@@ -833,7 +1182,6 @@ paths:
         409:
           $ref: '#/components/responses/ShipmentNotDelivered'
 
-
   /v3/shipments/{delivereaReference}:
     delete:
       tags:
@@ -870,6 +1218,182 @@ paths:
                         description: The expedition is not in a status that can be cancelled anymore
                         example: Expedition with reference XXXXXX is being deliverd and cann not be cancelled anymore
 
+  /v3/shipments/manifests:
+    post:
+      tags:
+        - Shipments
+      parameters:
+        - in: query
+          name: carrierCode
+          schema:
+            type: string
+          example: dummy
+          description: Carrier the manifest will be generated for
+        - in: query
+          name: full
+          description: If present and truthy, details of all the expedition will be inclueded (bigger file)
+          schema:
+            type: boolean
+            default: false
+          example: false
+        - in: query
+          name: distributionCenterId
+          description: Distribution center the manifest will be generated for
+          schema:
+            type: string
+          example: 51453d83-8014-11ea-bae6-026b033c7ea0
+        - in: query
+          name: fromCreatedAtDate
+          schema:
+            type: string
+          example: '2022-05-22'
+          description: Starting date the manifest will be generated from (format YYYY-MM-DD)
+        - in: query
+          name: toCreatedAtDate
+          schema:
+            type: string
+          example: '2022-05-22'
+          description: Ending date the manifest will be generated from (format YYYY-MM-DD)
+      security:
+        - basicAuth: [ ]
+      summary: Generate shipments manifest for a day or date range
+      responses:
+        200:
+          $ref: '#/components/responses/GenerateManifestResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+
+  /v3/shipments/exports:
+    post:
+      tags:
+        - Shipments
+      security:
+        - basicAuth: []
+      summary: Export shipments data to file
+      requestBody:
+        description: 'Export request'
+        content:
+          application/json:
+            schema:
+              required:
+                - destination
+                - format
+                - criteria
+              properties:
+                destination:
+                  type: string
+                  nullable: false
+                  description: Email where the export will be sent
+                  example: contact@email.com
+                format:
+                  type: string
+                  enum: [xlsx, csv]
+                  nullable: false
+                  description: Format of the file exported
+                  example: xlsx
+                criteria:
+                  type: object
+                  properties:
+                    carrierCode:
+                      type: string
+                      description: Carrier used when creating the shipment
+                      example: dummy
+                    serviceCode:
+                      type: string
+                      description: Service used when creating the shipment
+                      example: standard
+                    costCenterCode:
+                      type: string
+                      description: Alias identifier of the cost center
+                      example: DEFAULT
+                    clientReference:
+                      type: string
+                      description: Filter by exact clientReference
+                      example: REF0123456789
+                    carrierReference:
+                      type: string
+                      description: Filter by exact carrierReference
+                      example: CAR987654321
+                    delivereaReference:
+                      type: string
+                      description: Filter by exact delivereaReference
+                      example: D5312427d7f72b0
+                    parcelClientCode:
+                      type: string
+                      description: Filter by exact parcelClientCode
+                      example: 100597501
+                    toName:
+                      type: string
+                      description: Name of the recipient (like)
+                      example: 'John D'
+                    toZipCode:
+                      type: string
+                      description: Destination zip code
+                      example: 08005
+                    toCountryCode:
+                      type: string
+                      description: Destination country code
+                      example: ES
+                    dropPointKey:
+                      type: string
+                      description: Filter by drop point key
+                      example: DP123456789
+                    cashOnDelivery:
+                      type: number
+                      enum:
+                        [0,1]
+                      description: Wether or not the expedition includes cash on delivery (truthy/falsy type boolean)
+                      example: 1
+                    fromShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: From shipping date starting at
+                    toShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: To shipping date ending at
+                    statuses:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Status'
+                      description: Shipment statuses to filter
+                      example: ['active','finalized']
+                    currentTrackingCodes:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/TrackingCodes'
+                      description: Filter by tracking codes
+                      example: ['11']
+                    distributionCenterIds:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Uuid'
+                      description: Uuids of the distribution centers to filter
+                      example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+                    fromCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date starting at
+                    toCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date ending at
+                    distributionCenterCountryCode:
+                      type: string
+                      description: Filter by distribution center's country
+                      example: ES
+                    billingAccountId:
+                      type: string
+                      description: Filter by billing account
+                      example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
+      responses:
+        202:
+          description: Accepted
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+
   ### Returns ###
   /v3/returns:
     post:
@@ -883,14 +1407,12 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/CreateShipmentResponse'
-        400:
-          $ref: '#/components/responses/CarrierDocumentationError'
         401:
-          $ref: '#/components/responses/ApiUserOrkeyInvalid'
+          $ref: '#/components/responses/ApiUserOrKeyInvalid'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
         422:
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/MissingOrInvalidFieldsOrCarrierDocumentationError'
         500:
           $ref: '#/components/responses/UnexpectedError'
 
@@ -902,11 +1424,123 @@ paths:
       summary: Search returns by criteria
       parameters:
         - in: query
-          name: filters
+          name: carrierCode
           schema:
-            $ref: '#/components/schemas/ReturnCriteria'
+            type: string
+          description: Carrier used when creating the shipment
+          example: dummy
+        - in: query
+          name: serviceCode
+          schema:
+            type: string
+          description: Service used when creating the shipment
+          example: standard
+        - in: query
+          name: costCenterCode
+          schema:
+            type: string
+          description: Alias identifier of the cost center
+          example: DEFAULT
+        - in: query
+          name: clientReference
+          schema:
+            type: string
+          description: Filter by exact clientReference
+          example: REF0123456789
+        - in: query
+          name: carrierReference
+          description: Unique carrier reference
+          schema:
+            type: string
+          example: CAR987654321
+        - in: query
+          name: delivereaReference
+          description: Filter by exact delivereaReference
+          schema:
+            type: string
+          example: D5312427d7f72b0
+        - in: query
+          name: parcelClientCode
+          schema:
+            type: string
+          description: Filter by exact parcelClientCode
+          example: 100597501
+        - in: query
+          name: fromName
+          schema:
+            type: string
+          description: Name of the recipient (like)
+          example: 'John D'
+        - in: query
+          name: fromZipCode
+          schema:
+            type: string
+          description: Destination zip code
+          example: 08005
+        - in: query
+          name: fromCountryCode
+          schema:
+            type: string
+          description: Destination country code
+          example: ES
+        - in: query
+          name: fromShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: From shipping date starting at
+        - in: query
+          name: toShippingDate
+          schema:
+            $ref: '#/components/schemas/ShippingDate'
+          description: To shipping date ending at
+        - in: query
+          name: statuses[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Status'
+          description: Shipment statuses to filter
+          example: ['active','finalized']
+        - in: query
+          name: currentTrackingCodes[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TrackingCodes'
+          description: Filter by tracking codes
+          example: ['11']
+        - in: query
+          name: distributionCenterIds[]
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Uuid'
           style: deepObject
           explode: true
+          description: Uuids of the distribution centers to filter
+          example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+        - in: query
+          name: fromCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date starting at
+        - in: query
+          name: toCreatedAtDate
+          schema:
+            $ref: '#/components/schemas/CreatedAtDate'
+          description: From created at date ending at
+        - in: query
+          name: distributionCenterCountryCode
+          schema:
+            type: string
+          description: Filter by distribution center's country
+          example: ES
+        - in: query
+          name: billingAccountId
+          schema:
+            type: string
+          description: Filter by billing account
+          example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
         - in: query
           name: page
           schema:
@@ -1023,14 +1657,13 @@ paths:
                         description: The expedition is not in a status that can be cancelled anymore
                         example: Expedition with reference XXXXXX is being deliverd and cann not be cancelled anymore
 
-  ###  Exports ###
-  /v3/exports:
+  /v3/returns/exports:
     post:
       tags:
-        - Export data
+        - Returns
       security:
         - basicAuth: []
-      summary: Export expeditions data to file
+      summary: Export returns data to file
       requestBody:
         description: 'Export request'
         content:
@@ -1038,7 +1671,6 @@ paths:
             schema:
               required:
                 - destination
-                - provider
                 - format
                 - criteria
               properties:
@@ -1047,12 +1679,6 @@ paths:
                   nullable: false
                   description: Email where the export will be sent
                   example: contact@email.com
-                provider:
-                  type: string
-                  nullable: false
-                  description: Expedition tipe
-                  enum: [shipment, return]
-                  example: shipment
                 format:
                   type: string
                   enum: [xlsx, csv]
@@ -1060,14 +1686,203 @@ paths:
                   description: Format of the file exported
                   example: xlsx
                 criteria:
-                  $ref: '#/components/schemas/ShipmentCriteria'
+                  type: object
+                  properties:
+                    carrierCode:
+                      type: string
+                      description: Carrier used when creating the shipment
+                      example: dummy
+                    serviceCode:
+                      type: string
+                      description: Service used when creating the shipment
+                      example: standard
+                    costCenterCode:
+                      type: string
+                      description: Alias identifier of the cost center
+                      example: DEFAULT
+                    clientReference:
+                      type: string
+                      description: Filter by exact clientReference
+                      example: REF0123456789
+                    carrierReference:
+                      type: string
+                      description: Filter by exact carrierReference
+                      example: CAR987654321
+                    delivereaReference:
+                      type: string
+                      description: Filter by exact delivereaReference
+                      example: D5312427d7f72b0
+                    parcelClientCode:
+                      type: string
+                      description: Filter by exact parcelClientCode
+                      example: 100597501
+                    fromName:
+                      type: string
+                      description: Name of the recipient (like)
+                      example: 'John D'
+                    fromZipCode:
+                      type: string
+                      description: Destination zip code
+                      example: 08005
+                    fromCountryCode:
+                      type: string
+                      description: Destination country code
+                      example: ES
+                    fromShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: From shipping date starting at
+                    toShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: To shipping date ending at
+                    statuses:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Status'
+                      description: Shipment statuses to filter
+                      example: ['active','finalized']
+                    currentTrackingCodes:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/TrackingCodes'
+                      description: Filter by tracking codes
+                      example: ['11']
+                    distributionCenterIds:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Uuid'
+                      description: Uuids of the distribution centers to filter
+                      example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+                    fromCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date starting at
+                    toCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date ending at
+                    distributionCenterCountryCode:
+                      type: string
+                      description: Filter by distribution center's country
+                      example: ES
+                    billingAccountId:
+                      type: string
+                      description: Filter by billing account
+                      example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
       responses:
         202:
           description: Accepted
-        400:
+        422:
           $ref: '#/components/responses/MissingOrInvalidFields'
 
-  ### LABEL ENGINE CONF ###
+  /v3/expeditions/{delivereaReference}/trackings:
+    post:
+      tags:
+        - Trackings
+      parameters:
+        - in: path
+          name: delivereaReference
+          schema:
+            type: string
+          required: true
+          description: 'Deliverea reference'
+      security:
+        - basicAuth: []
+      summary: Add tracking info to a expedition
+      requestBody:
+        description: 'Add tracking request'
+        content:
+          application/json:
+            schema:
+              properties:
+                carrierCode:
+                  type: string
+                  nullable: false
+                  example: 'ownCarrier'
+                code:
+                  description: 'The status of the expedition in deliverea codes'
+                  type: number
+                  nullable: false
+                  example: 11
+                details:
+                  type: string
+                  example: "More info of tracking"
+                  nullable: false
+                date:
+                  allOf:
+                    - $ref: '#/components/schemas/Date'
+                  nullable: false
+                  description: 'The date when occurred the tracking event'
+      responses:
+        201:
+          description: 'Tracking created'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  ### Assignation match ###
+  /v3/{expeditionType}/assignation:
+    post:
+      tags:
+        - Assignation match
+      parameters:
+        - in: path
+          name: expeditionType
+          schema:
+            type: string
+            enum:
+              - shipments
+              - returns
+          required: true
+          description: 'Expedition type'
+      security:
+        - basicAuth: []
+      summary: Match Rule
+      requestBody:
+        $ref: '#/components/requestBodies/OrderRequest'
+      responses:
+        200:
+          description: carrier/costCenterCode/service assignation
+          content:
+            application/json:
+              schema:
+                properties:
+                  carrierCode:
+                    type: string
+                    nullable: true
+                    description: Carrier code. If rules are to be use this parameter should be set to 'auto'.
+                    example: dummy
+                  serviceCode:
+                    type: string
+                    nullable: true
+                    description: Service code. If rules are to be use this parameter should be set to 'auto'.
+                    example: standard
+                  costCenterCode:
+                    type: string
+                    nullable: true
+                    description: Alias identifier of the cost center
+                    default: DEFAULT
+        400:
+          description: 'No matching rule found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: 'VE0400'
+                      message:
+                        type: string
+                        description: No rules matched for this expedition
+                        example: No rules matched for this expedition
+
+
+
   /v3/carriers/{carrierCode}/range:
     get:
       tags:
@@ -1181,68 +1996,8 @@ paths:
                         description: Missing or invalid field(s)
                         example: "startCode: This value should not be blank."
 
-  ### RULES ###
-  /v3/{expeditions}/assignation:
-    post:
-      tags:
-        - Rules
-      parameters:
-        - in: path
-          name: expeditions
-          schema:
-            type: string
-            enum:
-              - orders
-              - shipments
-              - returns
-          required: true
-          description: 'Expedition type'
-      security:
-        - basicAuth: []
-      summary: Match Rule
-      requestBody:
-        $ref: '#/components/requestBodies/OrderRequest'
-      responses:
-        200:
-          description: carrier/costCenter/service assignation
-          content:
-            application/json:
-              schema:
-                properties:
-                  carrierCode:
-                    type: string
-                    nullable: true
-                    description: Carrier code. If rules are to be use this parameter should be set to 'auto'.
-                    example: dummy
-                  serviceCode:
-                    type: string
-                    nullable: true
-                    description: Service code. If rules are to be use this parameter should be set to 'auto'.
-                    example: standard
-                  costCenter:
-                    type: string
-                    nullable: true
-                    description: Alias identifier of the cost center
-                    default: DEFAULT
-        400:
-          description: 'No matching route found'
-          content:
-            application/json:
-              schema:
-                properties:
-                  error:
-                    type: object
-                    properties:
-                      code:
-                        type: string
-                        example: 'VE0400'
-                      message:
-                        type: string
-                        description: No rules matched for this expedition
-                        example: No rules matched for this expedition
 
-  ### RWP ###
-  /v3/returns-portal/{distributionCenterId}:
+  /v3/distribution-centers/{distributionCenterId}/returns-portal:
     post:
       tags:
         - ReturnsWebPortal
@@ -1260,11 +2015,40 @@ paths:
         $ref: '#/components/requestBodies/ReturnsWebPortalConfigurationRequest'
       responses:
         201:
+          description: 'Created'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        409:
+          $ref: '#/components/responses/SubdomainAlreadyTaken'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      tags:
+        - ReturnsWebPortal
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: [ ]
+      summary: Configure Returns Web Portal
+      requestBody:
+        $ref: '#/components/requestBodies/ReturnsWebPortalConfigurationRequest'
+      responses:
+        204:
           description: 'OK'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        400:
+        422:
           $ref: '#/components/responses/MissingOrInvalidFields'
+        404:
+          $ref: '#/components/responses/NotFound'
         409:
           $ref: '#/components/responses/SubdomainAlreadyTaken'
         500:
@@ -1291,7 +2075,7 @@ paths:
         500:
           $ref: '#/components/responses/UnexpectedError'
 
-  /v3/returns-portal/{distributionCenterId}/logo:
+  /v3/distribution-centers/{distributionCenterId}/returns-portal/logo:
     post:
       tags:
         - ReturnsWebPortal
@@ -1322,7 +2106,7 @@ paths:
         500:
           $ref: '#/components/responses/UnexpectedError'
 
-  /v3/returns-portal/{distributionCenterId}/activate:
+  /v3/distribution-centers/{distributionCenterId}/returns-portal/activate:
     patch:
       tags:
         - ReturnsWebPortal
@@ -1342,7 +2126,7 @@ paths:
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
-  /v3/returns-portal/{distributionCenterId}/deactivate:
+  /v3/distribution-centers/{distributionCenterId}/returns-portal/deactivate:
     patch:
       tags:
         - ReturnsWebPortal
@@ -1362,8 +2146,157 @@ paths:
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
-  ### TRACKINGS WEBHOOK ###
-  /v3/trackings-webhook/{distributionCenterId}:
+  /v3/rules:
+    post:
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      summary: Create a new rule
+      requestBody:
+        $ref: '#/components/requestBodies/RulesConfigurationRequest'
+      responses:
+        201:
+          description: 'OK'
+        409:
+          $ref: '#/components/responses/ConflictWithPriorityRuleError'
+        422:
+          $ref: '#/components/responses/RequestValidationRuleError'
+        400:
+          $ref: '#/components/responses/ModuleNotExistsRuleError'
+        403:
+          $ref: '#/components/responses/UserNotBelongToTheDistributionCenterRuleError'
+    get:
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      summary: Get a list of rules
+      parameters:
+        - name: "distributionCenterId"
+          in: "query"
+          description: "ID of distribution center"
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
+        - name: "module"
+          in: "query"
+          description: "The module of the rule, if not value provided use general"
+          required: false
+          schema:
+            type: string
+          example: "returns"
+        - name: "limit"
+          in: "query"
+          description: "Limit the number of rules"
+          required: false
+          schema:
+            type: integer
+          example: 1
+        - name: "offset"
+          in: "query"
+          description: "Offset the number of rules, usefull for pagination results"
+          required: false
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: '#/components/responses/RuleListResponse'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+  /v3/rules/{id}:
+    get:
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      summary: Get a rule by id
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the rule"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          $ref: '#/components/responses/RuleResponse'
+        422:
+          $ref: '#/components/responses/UnprocessableContentError'
+        404:
+          $ref: '#/components/responses/RuleNotFoundError'
+        403:
+          $ref: '#/components/responses/UserNotBelongToTheDistributionCenterRuleError'
+    put:
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      summary: Update the properties of the rule
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the rule"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/RulesUpdateRequest'
+      responses:
+        200:
+          description: 'OK'
+        422:
+          $ref: '#/components/responses/UnprocessableContentError'
+        404:
+          $ref: '#/components/responses/RuleNotFoundError'
+        403:
+          $ref: '#/components/responses/UserNotBelongToTheDistributionCenterRuleError'
+    delete:
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      summary: Update the properties of the rule
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the rule"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 'OK'
+        404:
+          $ref: '#/components/responses/RuleNotFoundError'
+        403:
+          $ref: '#/components/responses/UserNotBelongToTheDistributionCenterRuleError'
+
+  /v3/rules/match:
+    post:
+      summary: Return matched rule
+      description: Return the rule that meets the conditions
+      tags:
+        - Rules
+      security:
+        - basicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/RulesMatchRequest'
+      responses:
+        200:
+          $ref: '#/components/responses/RuleResponse'
+        422:
+          $ref: '#/components/responses/UnprocessableMatchContentError'
+        400:
+          $ref: '#/components/responses/NoRuleMatchError'
+
+
+  /v3/distribution-centers/{distributionCenterId}/trackings-webhook:
     post:
       tags:
         - TrackingsWebhook
@@ -1376,15 +2309,40 @@ paths:
           description: 'Distribution Center identifier'
       security:
         - basicAuth: []
-      summary: Configure Trackings Webhook
+      summary: Create Trackings Webhook configuration
       requestBody:
         $ref: '#/components/requestBodies/TrackingsWebhookConfigurationRequest'
       responses:
         201:
+          description: 'Created'
+        403:
+          $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+        500:
+          $ref: '#/components/responses/UnexpectedError'
+
+    put:
+      tags:
+        - TrackingsWebhook
+      parameters:
+        - in: path
+          name: distributionCenterId
+          schema:
+            type: string
+          required: true
+          description: 'Distribution Center identifier'
+      security:
+        - basicAuth: []
+      summary: Edit Trackings Webhook configuration
+      requestBody:
+        $ref: '#/components/requestBodies/TrackingsWebhookConfigurationRequest'
+      responses:
+        204:
           description: 'OK'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
-        400:
+        422:
           $ref: '#/components/responses/MissingOrInvalidFields'
         500:
           $ref: '#/components/responses/UnexpectedError'
@@ -1405,13 +2363,15 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/TrackingsWebhookConfigurationResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
         500:
           $ref: '#/components/responses/UnexpectedError'
 
 
-  /v3/trackings-webhook/{distributionCenterId}/activate:
+  /v3/distribution-centers/{distributionCenterId}/trackings-webhook/activate:
     patch:
       tags:
         - TrackingsWebhook
@@ -1431,7 +2391,7 @@ paths:
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
-  /v3/trackings-webhook/{distributionCenterId}/deactivate:
+  /v3/distribution-centers/{distributionCenterId}/trackings-webhook/deactivate:
     patch:
       tags:
         - TrackingsWebhook
@@ -1458,17 +2418,61 @@ components:
       type: http
       scheme: basic
 
-  ########################
-  # REQUESTS
-  ########################
   requestBodies:
+    AdvancedTrackingConfigurationRequest:
+      description: 'Advanced tracking configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/AdvancedTrackingConfiguration'
+
+    BillingAccountRequest:
+      description: 'Billing account request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BillingAccount'
+
+    CostCenterRequest:
+      description: Cost center properties and status
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: boolean
+                description: active or inactive
+                example: true
+              costCenter:
+                type: string
+                description: Alias identifier of the cost center
+                example: DEFAULT
+              labelType:
+                type: string
+                description: pdf or zpl depending on availability
+                example: pdf
+              labelSource:
+                type: string
+                description: carrier or label engine depending on availability
+                example: carrier
+              contact:
+                type: string
+                description: Carrier contact to be written to in case of opening a Comm Hub ticket
+                example: support@dummy.com
+              credentials:
+                type: object
+                description: Carrier credentials configured for the cost center (see credential fields)
+                example:
+                  userName: demo
+                  password: demo
+
     DistributionCenterRequest:
       description: 'Distribution center creation request'
       content:
         application/json:
           schema:
             required:
-              - status
               - name
               - address
               - zipCode
@@ -1476,10 +2480,6 @@ components:
               - phone
               - email
             properties:
-              status:
-                type: boolean
-                description: active or inactive
-                example: true
               name:
                 type: string
                 description: name of the distribution center
@@ -1516,80 +2516,28 @@ components:
               phone:
                 type: string
                 nullable: false
-                description: 'Phone number. Depending on the carrier and country international prefix might be requiered (ex: 0034 666778899)'
+                description: 'Phone number. Depending on the carrier and country international prefix might be required (ex: 0034 666778899)'
                 example: 666778899
               email:
                 type: string
                 nullable: false
                 description: Email
                 example: mymail@example.com
-              lat:
+              latitude:
                 type: number
                 nullable: true
                 description: Latitude
                 example: 41.3816785
-              lon:
+              longitude:
                 type: number
                 nullable: true
                 description: Longitude
                 example: 2.180848
-
-    CostCenterRequest:
-      description: Cost center properties and status
-      content:
-        application/json:
-          schema:
-            properties:
-              status:
-                type: boolean
-                description: active or inactive
-                example: true
-              costCenter:
+              billingAccountId:
                 type: string
-                description: Alias identifier of the cost center
-                example: DEFAULT
-              labelType:
-                type: string
-                description: pdf or zpl depending on availability
-                example: pdf
-              labelSource:
-                type: string
-                description: carrier or label engine depending on availability
-                example: carrier
-              contact:
-                type: string
-                description: Carrier contact to be written to in case of opening a Comm Hub ticket
-                example: support@dummy.com
-              credentials:
-                type: object
-                description: Carrier credentials configured for the cost center (see credential fields)
-                example:
-                  userName: demo
-                  password: demo
-
-    AdvancedTrackingConfigurationRequest:
-      description: 'Advanced tracking configuration request'
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/AdvancedTrackingConfiguration'
-
-    ReturnsWebPortalConfigurationRequest:
-      description: 'Returns Web Portal configuration request'
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
-
-    TrackingsWebhookConfigurationRequest:
-      description: 'Returns Web Portal configuration request'
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
+                format: uuid
+                nullable: true
+                description: Billing account uuid which is associated to this distribution center
 
     OrderRequest:
       description: 'Order creation request'
@@ -1600,7 +2548,7 @@ components:
               - to
               - carrierCode
               - serviceCode
-              - costCenter
+              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -1618,7 +2566,7 @@ components:
                 nullable: true
                 description: Service code. If rules are to be use this parameter should be set to 'auto'.
                 example: standard
-              costCenter:
+              costCenterCode:
                 type: string
                 nullable: true
                 description: Alias identifier of the cost center
@@ -1633,10 +2581,14 @@ components:
                 description: Referennce of the shipping order in the client systems
                 example: REF0123456789
               shippingDate:
+                $ref: '#/components/schemas/ShippingDate'
+              description:
                 type: string
-                nullable: false
-                description: Date of the shipment (format YYYY-MM-DD)
-                example: '2022-03-18'
+                nullable: true
+                description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcel[items] is present)
+                example: Shoes and Shirts
+              totalAmount:
+                $ref: '#/components/schemas/TotalAmount'
               parcels:
                 type: array
                 items:
@@ -1645,10 +2597,10 @@ components:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
                 $ref: '#/components/schemas/ClientAdditionalInfo'
+              bulky:
+                $ref: '#/components/schemas/Bulky'
               customs:
                 $ref: '#/components/schemas/Customs'
-              # bulky:
-              # $ref: '#/components/schemas/Bulky'
 
     UpdateOrderRequest:
       description: 'Order update request'
@@ -1660,10 +2612,7 @@ components:
               to:
                 $ref: '#/components/schemas/Address'
               shippingDate:
-                type: string
-                nullable: false
-                description: Date of the shipment (format YYYY-MM-DD)
-                example: '2022-03-18'
+                $ref: '#/components/schemas/ShippingDate'
               parcels:
                 type: array
                 items:
@@ -1682,7 +2631,7 @@ components:
               - to
               - carrierCode
               - serviceCode
-              - costCenter
+              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -1700,7 +2649,7 @@ components:
                 nullable: true
                 description: Service code. If rules are to be use this parameter should be set to 'auto'.
                 example: standard
-              costCenter:
+              costCenterCode:
                 type: string
                 nullable: true
                 description: Alias identifier of the cost center
@@ -1715,10 +2664,14 @@ components:
                 description: Referennce of the shipping order in the client systems
                 example: REF0123456789
               shippingDate:
+                $ref: '#/components/schemas/ShippingDate'
+              description:
                 type: string
-                nullable: false
-                description: Date of the shipment (format YYYY-MM-DD)
-                example: '2022-03-18'
+                nullable: true
+                description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcel[items] is present)
+                example: Shoes and Shirts
+              totalAmount:
+                $ref: '#/components/schemas/TotalAmount'
               parcels:
                 type: array
                 items:
@@ -1727,10 +2680,10 @@ components:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
                 $ref: '#/components/schemas/ClientAdditionalInfo'
+              bulky:
+                $ref: '#/components/schemas/Bulky'
               customs:
                 $ref: '#/components/schemas/Customs'
-              # bulky:
-              # $ref: '#/components/schemas/Bulky'
 
     ReturnRequest:
       description: 'Return documentation request'
@@ -1741,7 +2694,7 @@ components:
               - from
               - carrierCode
               - serviceCode
-              - costCenter
+              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -1759,7 +2712,7 @@ components:
                 nullable: true
                 description: Service code. If rules are to be use this parameter should be set to 'auto'.
                 example: standard
-              costCenter:
+              costCenterCode:
                 type: string
                 nullable: true
                 description: Alias identifier of the cost center
@@ -1774,10 +2727,14 @@ components:
                 description: Referennce of the shipping order in the client systems
                 example: REF0123456789
               shippingDate:
+                $ref: '#/components/schemas/ShippingDate'
+              description:
                 type: string
-                nullable: false
-                description: Date of the shipment (format YYYY-MM-DD)
-                example: '2022-03-18'
+                nullable: true
+                description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcel[items] is present)
+                example: Shoes and Shirts
+              totalAmount:
+                $ref: '#/components/schemas/TotalAmount'
               parcels:
                 type: array
                 items:
@@ -1786,18 +2743,85 @@ components:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
                 $ref: '#/components/schemas/ClientAdditionalInfo'
+              bulky:
+                $ref: '#/components/schemas/Bulky'
               customs:
                 $ref: '#/components/schemas/Customs'
-              # bulky:
-              # $ref: '#/components/schemas/Bulky'
 
-  ########################
-  # RESPONSES
-  ########################
+    ReturnsWebPortalConfigurationRequest:
+      description: 'Returns Web Portal configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
+
+    RulesConfigurationRequest:
+      description: 'Rules configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/RulesConfiguration'
+    RulesUpdateRequest:
+      description: 'Rules configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/RulesUpdateConfiguration'
+
+    RulesMatchRequest:
+      description: 'Rule match request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/RulesMatch'
+
+    TrackingsWebhookConfigurationRequest:
+      description: 'Returns Web Portal configuration request'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
+
   responses:
-    ### Distribution Centers ###
-    ListDistributionCentersResponse:
-      description: 'Lists the distribution centers of the current user'
+    AdvancedTrackingConfigurationResponse:
+      description: 'Advanced tracking configuration response'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/AdvancedTrackingConfiguration'
+              - properties:
+                  logo:
+                    type: string
+                    format: url
+                    nullable: true
+                    description: 'Logo url'
+                    example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+
+    SubdomainAlreadyTaken:
+      description: 'A request field is invalid or missing'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 'VE0900'
+                  message:
+                    type: string
+                    description: 'Error info'
+                    example: 'The subdomain X is not available. Please choose a different one'
+
+    ListBillingAccountResponse:
+      description: 'Billing Account list response'
       content:
         application/json:
           schema:
@@ -1805,18 +2829,24 @@ components:
               data:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DistributionCenter'
+                  $ref: '#/components/schemas/BillingAccount'
 
-    GetDistributionCenterResponse:
-      description: 'Get distribution centers response'
+    BillingAccountResponse:
+      description: 'Billing Account response'
       content:
         application/json:
           schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/DistributionCenter'
+            allOf:
+              - $ref: '#/components/schemas/BillingAccount'
+              - properties:
+                  distributionCenterIds:
+                    type: array
+                    description: Distribution centers ids associated to this billing address
+                    items:
+                      type: string
+                      format: uuid
+                      example: 49030f12-79e6-4e1f-9e3d-b3f6774d742b
 
-    ### Carriers and Services ###
     ListCarriersResponse:
       description: 'Lists carriers and available methods'
       content:
@@ -1839,7 +2869,6 @@ components:
                 items:
                   $ref: '#/components/schemas/Service'
 
-    ### Cost Centers ###
     ListCostCentersResponse:
       description: 'Get cost center response'
       content:
@@ -1939,68 +2968,25 @@ components:
                           description: Active or not
                           example: true
 
-    ### Advanced Tracking ###
-    AdvancedTrackingConfigurationResponse:
-      description: 'Advanced tracking configuration response'
+    ListDistributionCentersResponse:
+      description: 'Lists the distribution centers of the current user'
       content:
         application/json:
           schema:
             properties:
               data:
-                allOf:
-                  - properties:
-                      distributionCenterId:
-                        type: string
-                        description: 'Distribution center identifier'
-                        example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
-                  - $ref: '#/components/schemas/AdvancedTrackingConfiguration'
-                  - properties:
-                      logo:
-                        type: string
-                        format: url
-                        nullable: true
-                        description: 'Logo url'
-                        example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+                type: array
+                items:
+                  $ref: '#/components/schemas/DistributionCenter'
 
-    ### RWP ###
-    ReturnsWebPortalConfigurationResponse:
-      description: 'Returns Web Portal configuration response'
+    GetDistributionCenterResponse:
+      description: 'Get distribution centers response'
       content:
         application/json:
           schema:
-            properties:
-              data:
-                allOf:
-                  - properties:
-                      distributionCenterId:
-                        type: string
-                        description: 'Distribution center identifier'
-                        example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
-                  - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
-                  - properties:
-                      logo:
-                        type: string
-                        format: url
-                        nullable: true
-                        description: 'Logo url'
-                        example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+            $ref: '#/components/schemas/DistributionCenter'
 
-    TrackingsWebhookConfigurationResponse:
-      description: 'Trackings webhook configuration response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                allOf:
-                  - properties:
-                      distributionCenterId:
-                        type: string
-                        description: 'Distribution center identifier'
-                        example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
-                  - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
 
-    ### Orders, shipments and returns ###
     CreateOrderResponse:
       description: 'Order created successfully response'
       content:
@@ -2021,13 +3007,12 @@ components:
                 nullable: true
                 description: Service to be used when creating the shipment
                 example: standard
-              costCenter:
+              costCenterCode:
                 type: string
                 nullable: true
                 description: Alias identifier of the cost center
                 default: DEFAULT
 
-    ### Orders, shipments and returns ###
     CreateShipmentResponse:
       description: 'Shipment documented successfully response'
       content:
@@ -2038,11 +3023,126 @@ components:
               - clientReference
               - carrierCode
               - serviceCode
-              - costCenter
+              - costCenterCode
             properties:
               data:
                 type: object
                 properties:
+                  delivereaReference:
+                    type: string
+                    description: Unique deliverea reference
+                    example: D5312427d7f72b0
+                  carrierReference:
+                    type: string
+                    description: Unique carrier reference
+                    example: CAR987654321
+                  carrierCode:
+                    type: string
+                    nullable: true
+                    description: Carrier to be used when creating the shipment
+                    example: dummy
+                  serviceCode:
+                    type: string
+                    nullable: true
+                    description: Service to be used when creating the shipment
+                    example: standard
+                  costCenterCode:
+                    type: string
+                    nullable: true
+                    description: Alias identifier of the cost center
+                    default: DEFAULT
+
+    SearchOrdersResponse:
+      description: 'Search orders response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderSearchResult'
+              count:
+                type: number
+                description: Total number of orders that match the query
+                example: 1
+
+    SearchShipmentsResponse:
+      description: 'Search shipments response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShipmentsSearchResult'
+              count:
+                type: number
+                description: Total number of shipments that match the query
+                example: 1
+
+    SearchReturnsResponse:
+      description: 'Search returns response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReturnsSearchResult'
+              count:
+                type: number
+                description: Total number of returns that match the query
+                example: 1
+
+    GetShipmentResponse:
+      description: 'Shipment response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                $ref: '#/components/schemas/Shipment'
+
+    GetOrderResponse:
+      description: 'Order response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                $ref: '#/components/schemas/Order'
+
+    GetReturnResponse:
+      description: 'Shipment response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                $ref: '#/components/schemas/Return'
+
+
+    LabelResponse:
+      description: 'Label response'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: File type
+                    enum: [pdf,zpl]
+                    example: pdf
+                  content:
+                    type: string
+                    description: Base 64 encoded file
+                    example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
                   delivereaReference:
                     type: string
                     description: Unique deliverea reference
@@ -2057,32 +3157,11 @@ components:
                     example: REF0123456789
                   carrierCode:
                     type: string
-                    nullable: true
-                    description: Carrier to be used when creating the shipment
-                    example: dummy
-                  serviceCode:
-                    type: string
-                    nullable: true
-                    description: Service to be used when creating the shipment
-                    example: standard
-                  costCenter:
-                    type: string
-                    nullable: true
-                    description: Alias identifier of the cost center
-                    default: DEFAULT
-                  advanceTrackingUrl:
-                    type: string
-                    description: Advanced tracking portal url given is correctly configured and active
-                    example: https://my subdomain.trackorder.io/q?=REF0123456789
-                  parcelBarcodes:
-                    type: array
-                    description: Array of parcel identifiers if any given
-                    items:
-                      type: string
-                      example: a0ee0123e615dc075551
+                    description: Error code coming from the carrier
+                    example: 20010
 
-    SearchOrdersResponse:
-      description: 'Search orders response'
+    GetExpeditionPodResponse:
+      description: 'Label response'
       content:
         application/json:
           schema:
@@ -2090,144 +3169,15 @@ components:
               data:
                 type: object
                 properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/OrderSearchResult'
-                  count:
-                    type: number
-                    description: Total number of orders that match the query
-                    example: 1
-
-    SearchShipmentsResponse:
-      description: 'Search shipments response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ShipmentsSearchResult'
-                  count:
-                    type: number
-                    description: Total number of shipments that match the query
-                    example: 1
-
-    SearchReturnsResponse:
-      description: 'Search returns response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ReturnsSearchResult'
-                  count:
-                    type: number
-                    description: Total number of returns that match the query
-                    example: 1
-
-    GetShipmentResponse:
-      description: 'Shipment response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/Shipment'
-
-    GetOrderResponse:
-      description: 'Shipment response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                required:
-                  - carrierCode
-                  - serviceCode
-                  - costCenter
-                  - clientReference
-                  - shippingDate
-                  - distributionCenterId
-                  - parcels
-                properties:
-                  delivereaReference:
+                  type:
                     type: string
-                    description: Unique deliverea reference
-                    example: D5312427d7f72b0
-                  clientReference:
+                    description: File type
+                    enum: [pdf,urñ]
+                    example: pdf
+                  content:
                     type: string
-                    nullable: false
-                    description: Referennce of the shipping order in the client systems
-                    example: REF0123456789
-                  distributionCenterId:
-                    type: string
-                    description: 'Distribution center identifier'
-                    example: '51453d83-8014-11ea-bae6-026b033c7ea0'
-                  to:
-                    $ref: '#/components/schemas/Address'
-                  from:
-                    $ref: '#/components/schemas/Address'
-                  carrierCode:
-                    type: string
-                    nullable: true
-                    description: Carrier to be used when creating the shipment
-                    example: dummy
-                  serviceCode:
-                    type: string
-                    nullable: true
-                    description: Service to be used when creating the shipment
-                    example: standard
-                  costCenter:
-                    type: string
-                    nullable: true
-                    description: Alias identifier of the cost center
-                    default: DEFAULT
-                  shippingDate:
-                    type: string
-                    nullable: false
-                    description: Date of the shipment (format YYYY-MM-DD)
-                    example: '2022-03-18'
-                  parcels:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ParcelResponse'
-                  serviceAttributes:
-                    $ref: '#/components/schemas/ServiceAttributes'
-                  clientAdditionalInfo:
-                    $ref: '#/components/schemas/ClientAdditionalInfo'
-                  customs:
-                    $ref: '#/components/schemas/Customs'
-                    # bulky:
-                    # $ref: '#/components/schemas/Bulky'
-                  orderStatus:
-                    $ref: '#/components/schemas/OrderStatus'
-                  orderDocumentationAttempt:
-                    type: string
-                    description: When on "pendig" status Documentation attempts vs max retries
-                    example: "2/15"
-                  orderDocumentationErrorMessage:
-                    type: string
-                    description: When on "error_documented" status, the error detail
-                    example: null
-
-    GetReturnResponse:
-      description: 'Shipment response'
-      content:
-        application/json:
-          schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/Return'
+                    description: Base 64 encoded file or url
+                    example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
 
     GetExpeditionTrackingsResponse:
       description: 'Trackings response'
@@ -2283,136 +3233,53 @@ components:
                                 type: number
                                 description: Timestamp of the tracking event
                                 example: 1647267147
+                        createdAt:
+                          type: number
+                          description: Timestamp of the tracking creation
+                          example: 1647267147
 
-    LabelResponse:
-      description: 'Label response'
+    GenerateManifestResponse:
+      description: 'Generate manifest response'
       content:
         application/json:
           schema:
             properties:
-              data:
-                type: object
-                properties:
-                  carrierCode:
-                    type: string
-                    description: Error code coming from the carrier
-                    example: 20010
-                  type:
-                    type: string
-                    description: File type
-                    enum: [pdf,zpl]
-                    example: pdf
-                  content:
-                    type: string
-                    description: Base 64 encoded file
-                    example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
+              content:
+                type: string
+                description: File contents base64 encoded
+                example: VBERi0x...0NTQzNQolJUVPRg==
+              mimeType:
+                type: string
+                description: File mime type
+                default: application/pdf
+                example: application/pdf
 
-    GetExpeditionPodResponse:
-      description: 'Label response'
+    ### Error responses ###
+    MissingOrInvalidFieldsOrCarrierDocumentationError:
+      description: 'There are missing or invalid fields or there was an error documenting against the carrier'
       content:
         application/json:
           schema:
-            properties:
-              data:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    description: File type
-                    enum: [pdf,urñ]
-                    example: pdf
-                  content:
-                    type: string
-                    description: Base 64 encoded file or url
-                    example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
-
-
-    ########################
-    # ERROR RESPONSES
-    ########################
-    MissingOrInvalidFields:
-      description: 'A request field is invalid or missing'
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: 'VE0900'
-                  message:
-                    type: string
-                    description: Error info
-                    example: 'X requiered field is missing | Format of field X is invalid'
-
-    UnprocessableEntity:
-      description: 'Request could not be processed because there are missing or invalid fields'
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: VE0900
-                  message:
-                    type: string
-                    description: Error info
-                    example: Missing or invalid field(s)
+            oneOf:
+              - $ref: '#/components/schemas/CarrierDocumentationErrorProperties'
+              - $ref: '#/components/schemas/MissingOrInvalidFieldsProperties'
+          examples:
+            CarrierDocumentationError:
+              summary: There are missing or invalid fields
+              value:
+                error:
+                  code: 'CE001'
+                  message: 'Authentication against the carrier failed'
+                  carrierCode:  'AUTHERR1'
+                  carrierMessage: 'The token is invalid'
+            MissingOrInvalidFields:
+              summary: there was an error documenting against the carrier
+              value:
+                error:
+                  code: 'VE0900'
+                  message: 'X required field is missing | Format of field X is invalid'
                   detail:
-                    type: object
-                    example:
-                      distributionCenterId: This is not a valid UUID
-                      carrierCode: This value should not be blank
-
-    CarrierDocumentationError:
-      description: 'There was an error documenting against the carrier'
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                required:
-                  - code
-                  - message
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: 'CE0130'
-                  message:
-                    type: string
-                    description: Error info
-                    example: 'The carrier token credentials is invalid'
-                  carrierCode:
-                    type: string
-                    description: Error code coming from the carrier
-                    example: dummy
-                  carrierMessage:
-                    type: string
-                    description: Error info coming from the carrier
-                    example: 'The token is invalid'
-
-    NotFound:
-      description: 'Resource not found'
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: 'NF0002'
-                  message:
-                    type: string
-                    description: 'Error info'
-                    example: 'Resource not found'
+                    clientReference: This value should not be blank.
 
     LabelEngineDisabled:
       description: 'Resource not found'
@@ -2499,7 +3366,219 @@ components:
                     description: 'Error info'
                     example: 'Api-user or api-key invalid'
 
-    SubdomainAlreadyTaken:
+    ReturnsWebPortalConfigurationResponse:
+      description: 'Returns Web Portal configuration response'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ReturnsWebPortalConfiguration'
+              - properties:
+                  logo:
+                    type: string
+                    format: url
+                    nullable: true
+                    description: 'Logo url'
+                    example: 'https://www.deliverea.com/wp-content/uploads/2020/02/logo-color.png'
+
+    RuleResponse:
+      description: 'The rule object'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Rule'
+    RuleListResponse:
+      description: 'The list of rules'
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    description: "The total of rules queried without pagination"
+                    example: 1
+                  rules:
+                    type: array
+                    description: "The rules list"
+                    items:
+                      $ref: '#/components/schemas/Rule'
+
+
+    BadRequestError:
+      description: 'Required fields must be provided'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: "The error code"
+                    example: "missing_distribution_center"
+                  message:
+                    type: string
+                    description: "A description of the error"
+                    example: "Missing distribution center id in query parameters"
+
+    UnprocessableContentError:
+      description: 'Error in the format of a parameter'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: "The error code"
+                    example: "invalid_argument"
+                  message:
+                    type: string
+                    description: "A description of the error"
+                    example: "<Shared\\Domain\\ValueObject\\Uuid> does not allow the value <3da3e9f2-1436-4ff4-a2e4-327d189c333y>"
+
+    UnprocessableMatchContentError:
+      description: 'Error in the format of a parameter'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: "The error code"
+                    example: "request_validation"
+                  message:
+                    type: string
+                    description: "A description of the error"
+                    example: "The request has an error"
+
+    NoRuleMatchError:
+      description: 'No rule match for the given data'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: "The error code"
+                    example: "VE0400"
+                  message:
+                    type: string
+                    description: "A description of the error"
+                    example: "No rules matched for this expedition"
+
+    RuleNotFoundError:
+      description: 'Error in the format of a parameter'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: "The error code"
+                    example: "rule.not_exists"
+                  message:
+                    type: string
+                    description: "the description of the error"
+                    example: "The rule <ruleId> does not exists"
+
+    ConflictWithPriorityRuleError:
+      description: 'Conflict with the priority of the rule'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: 'The error code'
+                    example: 'rule.priority_already_exists'
+                  message:
+                    type: string
+                    description: 'The description of the error'
+                    example: 'The rule priority <2> already exists'
+
+    ModuleNotExistsRuleError:
+      description: 'The module not exists'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: 'The error code'
+                    example: 'VE0900'
+                  message:
+                    type: string
+                    description: 'The description of the error'
+                    example: 'Module example not found'
+
+    UserNotBelongToTheDistributionCenterRuleError:
+      description: 'The user not belong to the distribution center'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: 'The error code'
+                    example: 'NA0013'
+                  message:
+                    type: string
+                    description: 'The description of the error'
+                    example: 'User does not belong to this distribution center'
+
+    RequestValidationRuleError:
+      description: 'Error in the request body'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: 'The error code'
+                    example: 'request_validation'
+                  message:
+                    type: string
+                    description: 'The description of the error'
+                    example: 'The request has an error'
+
+    TrackingsWebhookConfigurationResponse:
+      description: 'Trackings webhook configuration response'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/TrackingsWebhookConfiguration'
+
+    MissingOrInvalidFields:
       description: 'A request field is invalid or missing'
       content:
         application/json:
@@ -2513,8 +3592,70 @@ components:
                     example: 'VE0900'
                   message:
                     type: string
+                    description: Error info
+                    example: 'X required field is missing | Format of field X is invalid'
+                  detail:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        example: This value should not be blank.
+
+    UnprocessableEntity:
+      description: 'Request could not be processed because there are missing or invalid fields'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: VE0900
+                  message:
+                    type: string
+                    description: Error info
+                    example: Missing or invalid field(s)
+                  detail:
+                    type: object
+                    example:
+                      distributionCenterId: This is not a valid UUID
+                      carrierCode: This value should not be blank
+
+    NotFound:
+      description: 'Resource not found'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 'NF0002'
+                  message:
+                    type: string
                     description: 'Error info'
-                    example: 'The subdomain X is not available. Please choose a different one'
+                    example: 'Resource not found'
+
+    ApiUserOrKeyInvalid:
+      description: 'Api key invalid response'
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 'NA0002'
+                  message:
+                    type: string
+                    description: 'Error info'
+                    example: 'Api-user or api-key invalid'
 
     UserDoesNotBelongToDistributionCenterError:
       description: 'Unauthorized response'
@@ -2550,76 +3691,103 @@ components:
                     description: 'Error info'
                     example: 'Unexpected error. Please contact with us through support@deliverea.com'
 
-  ########################
-  # ENTITIES
-  ########################
   schemas:
-    DistributionCenter:
+    AdvancedTrackingConfiguration:
       type: object
       properties:
-        id:
-          type: string
-          description: UUID identifier of the dictribution center
-          example: 966e4225-6cfa-11ea-bae6-026b033c7ea0
-        status:
+        active:
           type: boolean
-          description: active or inactive
+          nullable: false
+          description: 'Active or not'
           example: true
+        subdomain:
+          type: string
+          nullable: true
+          description: 'Advanced tracking webportal subdomain (https://mysubdomain.trackorder.io)'
+          example: 'mysubdomain'
+        color:
+          type: string
+          nullable: true
+          description: 'Hexadecimal code color'
+          example: '#D62424'
+        senderId:
+          type: string
+          description: 'Sender email identifier that will be the sender of the advanced tracking communications'
+          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
+        supportEmail:
+          type: string
+          format: email
+          nullable: true
+          description: 'Support email that will be displayed in the advanced tracking communications'
+          example: support@mydomain.com
+        emailNotifications:
+          type: array
+          items:
+            type: string
+            enum: [
+              'documented',
+              'pending_pickup',
+              'picked_up',
+              'leaving_origin',
+              'customs_inspection',
+              'on_way_to_destination',
+              'ready_to_deliver',
+              'delivered',
+              'incidence',
+              'exception',
+              'deposited_in_drop_point'
+            ]
+            description: 'Active email notifications'
+          example: [
+            'picked_up',
+            'ready_to_deliver',
+            'deposited_in_drop_point'
+          ]
+
+    BillingAccount:
+      type: object
+      properties:
         name:
           type: string
-          description: name of the distribution center
-          example: Warehouse 1
+          description: name of the billing account
+          example: Europe billing account
+        companyName:
+          type: string
+          description: Formal company name
+          example: Acme
+        billingName:
+          type: string
+          description: Billing company name
+          example: Acme, INC.
+        vat:
+          type: string
+          description: VAT number (must include country code for outside spain)
+          example: B08123456
         address:
           type: string
           description: Full address including street, mumber, floor and door
           example: Diagonal 25, 2 floor 1st
         city:
           type: string
-          nullable: false
-          description: Municipality
-          example: 'Barcelona'
+          description: City of the company
+          example: Barcelona
         zipCode:
           type: string
-          nullable: false
-          description: Postal code of the municipality
-          example: '08005'
-        countryCode:
-          type: string
-          nullable: true
-          description: State code in ISO format 3166-1-alpha-2
-          example: ES
+          description: Zip code of the company
+          example: 08003
         stateCode:
           type: string
           nullable: true
           description: State code in ISO format 3166-1-alpha-2 (only for US and Canada)
-          example: null
-        observations:
+          example: CA
+        countryCode:
           type: string
-          nullable: true
-          description: Extra information regarding the address
-          example: Back door, beware the dog
-        phone:
-          type: string
-          nullable: false
-          description: 'Phone number. Depending on the carrier and country international prefix might be requiered (ex: 0034 666778899)'
-          example: 666778899
-        email:
-          type: string
-          nullable: false
-          description: Email
-          example: mymail@example.com
-        lat:
-          type: number
-          nullable: true
-          description: Latitude
-          example: 41.3816785
-        lon:
-          type: number
-          nullable: true
-          description: Longitude
-          example: 2.180848
-        createdAt:
-          $ref: '#/components/schemas/Date'
+          description: Country code in ISO format 3166-1-alpha-2
+          example: ES
+        active:
+          type: boolean
+          description: Active or not
+          example: true
 
     Carrier:
       type: object
@@ -2679,165 +3847,214 @@ components:
           description: Any aditional service observations
           example: Mono-parcel
 
-    AdvancedTrackingConfiguration:
+    labelTypes:
+      type: array
+      items:
+        $ref: '#/components/schemas/labelType'
+      example: [pdf,zpl]
+
+    labelSources:
+      type: array
+      items:
+        $ref: '#/components/schemas/labelSource'
+      example: [carrier,label-engine]
+
+    credentialField:
+      type: object
+      description: Credential to be configured for using the carrier
+      properties:
+        key:
+          type: string
+          example: userName
+        name:
+          type: string
+          example: User
+
+    labelType:
+      type: string
+      enum: [pdf, zpl]
+      example:
+        'pdf'
+
+    labelSource:
+      type: string
+      enum: [carrier,label-engine]
+      example:
+        'carrier'
+
+    DistributionCenter:
       type: object
       properties:
-        status:
+        id:
+          type: string
+          description: UUID identifier of the dictribution center
+          example: 966e4225-6cfa-11ea-bae6-026b033c7ea0
+        active:
           type: boolean
-          nullable: false
-          description: 'Active or not'
+          description: active or inactive
           example: true
-        subdomain:
+        name:
+          type: string
+          description: name of the distribution center
+          example: Warehouse 1
+        address:
+          type: string
+          description: Full address including street, mumber, floor and door
+          example: Diagonal 25, 2 floor 1st
+        city:
+          type: string
+          nullable: false
+          description: Municipality
+          example: 'Barcelona'
+        zipCode:
+          type: string
+          nullable: false
+          description: Postal code of the municipality
+          example: '08005'
+        countryCode:
           type: string
           nullable: true
-          description: 'Advanced tracking webportal subdomain (https://mysubdomain.trackorder.io)'
-          example: 'mysubdomain'
-        color:
+          description: State code in ISO format 3166-1-alpha-2
+          example: ES
+        stateCode:
           type: string
           nullable: true
-          description: 'Hexadecimal code color'
-          example: '#D62424'
-        senderId:
+          description: State code in ISO format 3166-1-alpha-2 (only for US and Canada)
+          example: null
+        observations:
           type: string
-          description: 'Sender email identifier that will be the sender of the advanced tracking communications'
-          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
-        supportEmail:
-          type: string
-          format: email
           nullable: true
-          description: 'Support email that will be displayed in the advanced tracking communications'
-          example: support@mydomain.com
-        emailNotifications:
+          description: Extra information regarding the address
+          example: Back door, beware the dog
+        phone:
+          type: string
+          nullable: false
+          description: 'Phone number. Depending on the carrier and country international prefix might be required (ex: 0034 666778899)'
+          example: 666778899
+        email:
+          type: string
+          nullable: false
+          description: Email
+          example: mymail@example.com
+        latitude:
+          type: number
+          nullable: true
+          description: Latitude
+          example: 41.3816785
+        longitude:
+          type: number
+          nullable: true
+          description: Longitude
+          example: 2.180848
+        createdAt:
+          type: string
+          format: 'ISO-8601 (YYYY-MM-DDThh:mm:ssZ)'
+          example: '2021-01-03T13:00:54+0100'
+        updatedAt:
+          type: string
+          format: 'ISO-8601 (YYYY-MM-DDThh:mm:ssZ)'
+          example: '2021-01-03T13:00:54+0100'
+        billingAccountId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Billing account uuid which is associated to this distribution center
+
+    Order:
+      type: object
+      required:
+        - carrierCode
+        - serviceCode
+        - costCenterCode
+        - clientReference
+        - shippingDate
+        - distributionCenterId
+        - parcels
+      properties:
+        delivereaReference:
+          type: string
+          description: Unique deliverea reference
+          example: D5312427d7f72b0
+        clientReference:
+          type: string
+          nullable: false
+          description: Referennce of the shipping order in the client systems
+          example: REF0123456789
+        distributionCenterId:
+          type: string
+          description: 'Distribution center identifier'
+          example: '51453d83-8014-11ea-bae6-026b033c7ea0'
+        expeditionType:
+          type: string
+          enum:
+            [
+              'shipment',
+              'return'
+            ]
+        to:
+          $ref: '#/components/schemas/Address'
+        from:
+          $ref: '#/components/schemas/Address'
+        carrierCode:
+          type: string
+          nullable: true
+          description: Carrier to be used when creating the shipment
+          example: dummy
+        serviceCode:
+          type: string
+          nullable: true
+          description: Service to be used when creating the shipment
+          example: standard
+        costCenterCode:
+          type: string
+          nullable: true
+          description: Alias identifier of the cost center
+          default: DEFAULT
+        shippingDate:
+          $ref: '#/components/schemas/ShippingDate'
+        parcels:
           type: array
           items:
-            type: string
-            enum: [
-              'documented',
-              'pending_pickup',
-              'picked_up',
-              'leaving_origin',
-              'customs_inspection',
-              'on_way_to_destination',
-              'ready_to_deliver',
-              'delivered',
-              'incidence',
-              'exception',
-              'deposited_in_drop_point'
-            ]
-            description: 'Active email notifications'
-          example: [
-            'picked_up',
-            'ready_to_deliver',
-            'deposited_in_drop_point'
-          ]
-
-    ReturnsWebPortalConfiguration:
-      type: object
-      properties:
+            $ref: '#/components/schemas/ParcelResponse'
+        serviceAttributes:
+          $ref: '#/components/schemas/ServiceAttributes'
+        clientAdditionalInfo:
+          $ref: '#/components/schemas/ClientAdditionalInfo'
+        bulky:
+          $ref: '#/components/schemas/Bulky'
+        customs:
+          $ref: '#/components/schemas/Customs'
         status:
-          type: boolean
-          nullable: false
-          description: 'Active or not'
-          example: true
-        subdomain:
-          type: string
-          nullable: true
-          description: 'Advanced tracking webportal subdomain (https://mysubdomain.trackorder.io)'
-          example: 'mysubdomain'
-        color:
-          type: string
-          nullable: true
-          description: 'Hexadecimal code color'
-          example: '#D62424'
-        senderId:
-          type: string
-          description: 'Sender email identifier that will be the sender of the advanced tracking communications'
-          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
-        notificationEmail:
-          type: string
-          format: email
-          nullable: true
-          description: Email that will be CC'd when a return es created
-          example: support@mydomain.com
-        notificationOn:
-          type: boolean
-          nullable: false
-          description: Activate/deactivate CC'ing the notification email
-          example: true
-        pickupCarrier:
-          type: string
-          nullable: true
-          description: Carrier that will be used when the client creates a home pickup return
-          example: correosExpress
-        pickupService:
-          type: string
-          nullable: true
-          description: Service that will be used when the client creates a home pickup return
-          example: correos-24
-        officeCarrier:
-          type: string
-          nullable: true
-          description: Carrier that will be used when the client creates a home drop in office  return
-          example: correos
-        officeService:
-          type: string
-          nullable: true
-          description: Service that will be used when the client creates drop in office return
-          example: S0132
-        policyDays:
-          type: number
-          nullable: false
-          default: 15
-          description: Peiod in days when the client will be able to demand a return
-          example: 15
-        policyUrl:
-          type: string
-          nullable: true
-          format: url
-          description: Link to return policies information
-          example: https://mydomain.com/return-policy
-        exitLink:
-          type: string
-          nullable: true
-          format: url
-          description: Link where the customer will be redirected after the return demand is completed
-          example: https://mydomain.com/exit-link
-
-    TrackingsWebhookConfiguration:
-      type: object
-      properties:
-        status:
-          type: boolean
-          nullable: false
-          description: 'Active or not'
-          example: true
-        credentials:
+          $ref: '#/components/schemas/OrderStatus'
+        documentationAttempt:
           type: object
           properties:
-            user:
+            current:
+              description: Current attempt on documenting the order
               type: string
-              nullable: false
-              description: Basic auth username of the webhook provided
-              example: 'username'
-            password:
+              example: 2
+            max:
+              description: Maximum retry attemps to document the order
               type: string
-              nullable: false
-              description: Basic auth password of the webhook provided
-              example: 'password'
-        url:
+              example: 15
+          description: When on "pendig" status Documentation attempts vs max retries
+          example: {
+            current: 2,
+            max: 15
+          }
+        documentationErrorMessage:
           type: string
-          nullable: false
-          format: url
-          description: Endpoint the tracking updates will be posted to
-          example: https://mydomain.com/my-trackings-webhook
-
+          description: When on "error_documented" status, the error detail
+          example: null
+        label:
+          $ref: '#/components/schemas/ExpeditionDetailsLabel'
 
     Shipment:
       type: object
       required:
         - carrierCode
         - serviceCode
-        - costCenter
+        - costCenterCode
         - clientReference
         - shippingDate
         - distributionCenterId
@@ -2872,7 +4089,7 @@ components:
           nullable: true
           description: Service to be used when creating the shipment
           example: standard
-        costCenter:
+        costCenterCode:
           type: string
           nullable: true
           description: Alias identifier of the cost center
@@ -2882,14 +4099,22 @@ components:
           description: 'Distribution center identifier'
           example: '51453d83-8014-11ea-bae6-026b033c7ea0'
         shippingDate:
-          type: string
-          nullable: false
-          description: Date of the shipment (format YYYY-MM-DD)
-          example: '2022-03-18'
+          $ref: '#/components/schemas/ShippingDate'
         deliveryDate:
-          $ref: '#/components/schemas/Date'
+          $ref: '#/components/schemas/DeliveryDate'
+        description:
+          type: string
           nullable: true
-          description: Date which shipment was delivered
+          description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcel[items] is present)
+          example: Shoes and Shirts
+        totalAmount:
+          $ref: '#/components/schemas/TotalAmount'
+        currentTrackingCode:
+          description: Tracking code the shipment is actually at
+          type: string
+          example: '11'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtDate'
         parcels:
           type: array
           items:
@@ -2898,25 +4123,19 @@ components:
           $ref: '#/components/schemas/ServiceAttributes'
         clientAdditionalInfo:
           $ref: '#/components/schemas/ClientAdditionalInfo'
+        bulky:
+          $ref: '#/components/schemas/Bulky'
         customs:
           $ref: '#/components/schemas/Customs'
-        lastTrackingCode:
-          description: Filter by last status codes
-          type: string
-          example: '11'
-        # bulky:
-        # $ref: '#/components/schemas/Bulky'
-        createdAt:
-          $ref: '#/components/schemas/Date'
-          nullable: false
-          description: Shipment creation date and time
+        label:
+          $ref: '#/components/schemas/ExpeditionDetailsLabel'
 
     Return:
       type: object
       required:
         - carrierCode
         - serviceCode
-        - costCenter
+        - costCenterCode
         - clientReference
         - shippingDate
         - distributionCenterId
@@ -2940,7 +4159,7 @@ components:
           nullable: true
           description: Service to be used when creating the shipment
           example: standard
-        costCenter:
+        costCenterCode:
           type: string
           nullable: true
           description: Alias identifier of the cost center
@@ -2955,10 +4174,23 @@ components:
           description: Referennce of the shipping order in the client systems
           example: REF0123456789
         shippingDate:
+          $ref: '#/components/schemas/ShippingDate'
+        deliveryDate:
+          $ref: '#/components/schemas/DeliveryDate'
+        description:
           type: string
-          nullable: false
-          description: Date of the shipment (format YYYY-MM-DD)
-          example: '2022-03-18'
+          nullable: true
+          description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcel[items] is present)
+          example: Shoes and Shirts
+        totalAmount:
+          $ref: '#/components/schemas/TotalAmount'
+        currentTrackingCode:
+          description: Tracking code the return is currently at
+          type: string
+          example: '11'
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/CreatedAtDate'
         parcels:
           type: array
           items:
@@ -2967,31 +4199,35 @@ components:
           $ref: '#/components/schemas/ServiceAttributes'
         clientAdditionalInfo:
           $ref: '#/components/schemas/ClientAdditionalInfo'
+        bulky:
+          $ref: '#/components/schemas/Bulky'
         customs:
           $ref: '#/components/schemas/Customs'
-        # bulky:
-        # $ref: '#/components/schemas/Bulky'
-
+        label:
+          $ref: '#/components/schemas/ExpeditionDetailsLabel'
 
     OrderSearchResult:
       type: object
       required:
         - carrierCode
         - serviceCode
-        - costCenter
+        - costCenterCode
         - delivereaReference
         - clientReference
       properties:
-        orderStatus:
+        expeditionType:
           type: string
-          enum: [
-            draft,
-            pending,
-            documented,
-            error_documented
-          ]
-          example:
-            'pending'
+          enum:
+            [
+              'shipment',
+              'return'
+            ]
+          description: Type of expedition the order will document to
+          example: 'shipment'
+        status:
+          allOf:
+            - $ref: '#/components/schemas/OrderStatus'
+            - example: 'pending'
         carrierCode:
           type: string
           nullable: true
@@ -3002,7 +4238,7 @@ components:
           nullable: true
           description: Service to be used when creating the shipment
           example: standard
-        costCenter:
+        costCenterCode:
           type: string
           nullable: true
           description: Alias identifier of the cost center
@@ -3011,22 +4247,14 @@ components:
           type: string
           description: Unique deliverea reference
           example: D5312427d7f72b0
-        carrierReference:
-          type: string
-          description: Unique carrier reference
-          example: CAR987654321
         clientReference:
           type: string
           description: Unique client reference
           example: REF0123456789
         createdAt:
-          $ref: '#/components/schemas/Date'
-          description: Order creation date and time
+          $ref: '#/components/schemas/CreatedAtDate'
         shippingDate:
-          type: string
-          nullable: false
-          description: Date of the shipment (format YYYY-MM-DD)
-          example: '2022-03-18'
+          $ref: '#/components/schemas/ShippingDate'
         distributionCenterId:
           type: string
           description: 'Distribution center identifier'
@@ -3070,7 +4298,7 @@ components:
         - shippingDate
         - carrierCode
         - serviceCode
-        - costCenter
+        - costCenterCode
         - distributionCenterId
         - totalWeight
         - totalVolume
@@ -3102,7 +4330,7 @@ components:
           nullable: true
           description: Service to be used when creating the shipment
           example: standard
-        costCenter:
+        costCenterCode:
           type: string
           nullable: true
           description: Alias identifier of the cost center
@@ -3112,18 +4340,11 @@ components:
           description: 'Distribution center identifier'
           example: '51453d83-8014-11ea-bae6-026b033c7ea0'
         createdAt:
-          $ref: '#/components/schemas/Date'
-          nullable: false
-          description: Shipment creation date and time
+          $ref: '#/components/schemas/CreatedAtDate'
         shippingDate:
-          type: string
-          nullable: false
-          description: Date of the shipment (format YYYY-MM-DD)
-          example: '2022-03-18'
+          $ref: '#/components/schemas/ShippingDate'
         deliveryDate:
-          $ref: '#/components/schemas/Date'
-          nullable: true
-          description: Date which shipment was delivered
+          $ref: '#/components/schemas/DeliveryDate'
         totalWeight:
           type: number
           description: Sum of the weight of all the parcels of the expedition (kg)
@@ -3132,8 +4353,8 @@ components:
           type: number
           description: Sum of the volume of all the parcels of the expedition (cm3)
           example: 1.5
-        lastTrackingCode:
-          description: Filter by last status codes
+        currentTrackingCode:
+          description: Tracking code the shipment is currently at
           type: string
           example: '11'
         totalParcels:
@@ -3148,7 +4369,7 @@ components:
         - shippingDate
         - carrierCode
         - serviceCode
-        - costCenter
+        - costCenterCode
         - distributionCenterId
         - totalWeight
         - totalVolume
@@ -3165,7 +4386,7 @@ components:
           nullable: true
           description: Service to be used when creating the shipment
           example: standard
-        costCenter:
+        costCenterCode:
           type: string
           nullable: true
           description: Alias identifier of the cost center
@@ -3180,10 +4401,7 @@ components:
           description: Referennce of the shipping order in the client systems
           example: REF0123456789
         shippingDate:
-          type: string
-          nullable: false
-          description: Date of the shipment (format YYYY-MM-DD)
-          example: '2022-03-18'
+          $ref: '#/components/schemas/ShippingDate'
         totalWeight:
           type: number
           description: Sum of the weight of all the parcels of the expedition (kg)
@@ -3283,19 +4501,19 @@ components:
         phone:
           type: string
           nullable: false
-          description: 'Phone number. Depending on the carrier and country international prefix might be requiered (ex: 0034 666778899)'
+          description: 'Phone number. Depending on the carrier and country international prefix might be required (ex: 0034 666778899)'
           example: 666778899
         email:
           type: string
           nullable: false
           description: Email
           example: mymail@example.com
-        lat:
+        latitude:
           type: number
           nullable: true
           description: Latitude
           example: 41.3816785
-        lon:
+        longitude:
           type: number
           nullable: true
           description: Longitude
@@ -3310,34 +4528,49 @@ components:
         - length
       properties:
         weight:
-          type: string
+          type: number
           nullable: true
           description: Parcel's height in Kg
           example: 2
         height:
-          type: string
+          type: number
           nullable: false
           description: Parcel's height in cm
           example: 15
         width:
-          type: string
+          type: number
           nullable: false
           description: Parcel's height in cm
           example: 10
         length:
-          type: string
+          type: number
           nullable: false
           description: Parcel's height in cm
           example: 20
-        parcelCode:
+        clientCode:
           type: string
           nullable: true
-          description: Unique parcel identifier, provided by client and required for Label Engine flow
+          description: Unique numéric parcel identifier, provided by client and required for Label Engine flow
           example: 123456
-        parcelItems:
+        labelRangeCode:
+          type: string
+          nullable: true
+          description: Numéric label identifier assigned from the range configured for this carrier in the Label Engine Flow
+          example: 100040789786
+        labelBarcode:
+          type: string
+          nullable: true
+          description: Barcode generated for this parcel in the Label Engine flow
+          example: 100040789786X123456
+        items:
           type: array
           items:
             $ref: '#/components/schemas/ParcelItem'
+        QR:
+          type: string
+          nullable: true
+          description: URL or string for create an QR code in the label
+          example: https://www.deliverea.com/
 
     ParcelResponse:
       type: object
@@ -3367,12 +4600,12 @@ components:
           nullable: false
           description: Parcel's height in cm
           example: 20
-        parcelCode:
+        clientCode:
           type: string
           nullable: true
           description: Unique parcel identifier, provided by client and required for Label Engine flow
           example: 123456
-        parcelBarcode:
+        labelBarcode:
           type: string
           nullable: true
           description: If using label engine flow, unique barcode identifying the parcel and extracted from the range provided by the carrier
@@ -3381,7 +4614,7 @@ components:
           type: string
           nullable: true
           description: 'Parcel number out of the total of the the order, (ex: 1, 2, 3...)'
-        parcelItems:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/ParcelItem'
@@ -3400,9 +4633,10 @@ components:
           description: Description of the items (required for cross-border international shipments)
           example: "Black shoes size 42"
         amount:
-          $ref: '#/components/schemas/Price'
-          description: Value or price per item (required for cross-border international shipments)
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Price'
+            - description: Value or price per item (required for cross-border international shipments)
+            - nullable: true
         units:
           type: number
           nullable: false
@@ -3427,23 +4661,26 @@ components:
       description: 'Additional service attributes. Availability depends on the carrier and service.'
       properties:
         cashOnDelivery:
-          $ref: '#/components/schemas/Price'
-          description: Cash on delivery amount
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Price'
+            - description: Cash on delivery amount
+            - nullable: true
         dropPointKey:
           type: string
           nullable: true
           description: Drop-point identifier (for drop-point services)
           example: PS123456789
         pickupTime:
-          $ref: '#/components/schemas/HourRange'
-          description: The time must be provided in the standard format ISO-8601 (YYYY-MM-DDThh:mm:ssZ) taking into account the time zone of the origin country. We recommend using standard coding utilities that can take care of TimeZone and summer time hours automomatically.
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/HourRange'
+            - description: The time must be provided in the standard format ISO-8601 (YYYY-MM-DDThh:mm:ssZ) taking into account the time zone of the origin country. We recommend using standard coding utilities that can take care of TimeZone and summer time hours automomatically.
+            - nullable: true
         deliveryTime:
-          $ref: '#/components/schemas/HourRange'
-          description: The time must be provided in the standard format ISO-8601 (YYYY-MM-DDThh:mm:ssZ) taking into account the time zone of the destination country. We recommend using standard coding utilities that can take care of TimeZone and summer time hours automomatically.
-          nullable: true
-        notifications:
+          allOf:
+            - $ref: '#/components/schemas/HourRange'
+            - description: The time must be provided in the standard format ISO-8601 (YYYY-MM-DDThh:mm:ssZ) taking into account the time zone of the destination country. We recommend using standard coding utilities that can take care of TimeZone and summer time hours automomatically.
+            - nullable: true
+        carrierNotifications:
           type: object
           nullable: true
           description: Notifications the carrier will send to the final customer
@@ -3458,34 +4695,39 @@ components:
               nullable: true
               description: The carrier will send info email(s) to the final customer
               example: true
-        description:
-          type: string
-          nullable: true
-          description: Description of the expedition articles (required for crossborder internationa expeditions if no description by parcelItem is present)
-          example: Shoes and Shirts
-        totalAmount:
-          $ref: '#/components/schemas/Price'
-          description: Total amount or price of the expedition articles (required for crossborder internationa expeditions if no amount by parcelItem is present)
-          nullable: true
         saturdayDelivery:
           type: boolean
           nullable: true
           description: Whether or not the expedition should be delivered on Saturday or wait until next Monday (availability depends on carrier and service)
           example: false
-        needsReturnLabel:
+        includeReturnLabel:
           type: boolean
           nullable: true
           description: Whether or not to include dormant return label in case the final customer wants to return the expedition (availability depends on carrier and service)
           example: false
-        insuranceValue:
-          $ref: '#/components/schemas/Price'
-          description: Amount of the expedition insurance (necessary for expedition with insurance, availability depends on carrier and service)
+        returnProofOfDelivery:
+          type: boolean
           nullable: true
+          description: Whether or not to a proof of delivery should be returned back to origin (availability depends on carrier and service)
+          example: false
+        hideSender:
+          type: boolean
+          nullable: true
+          description: Whether or not to hide sender information in the printed label (availability depends on carrier and service)
+          example: false
+        insuranceValue:
+          allOf:
+            - $ref: '#/components/schemas/Price'
+            - description: Amount of the expedition insurance (necessary for expedition with insurance, availability depends on carrier and service)
+            - nullable: true
       example:
         saturdayDelivery: true
-        notifications:
+        carrierNotifications:
           email: true
-          sms: false
+        dropPointKey: PS123456789
+        pickupTime:
+          start: '2022-06-01T10:00:00+0100'
+          end: '2022-06-01T12:00:00+0100'
 
     Customs:
       type: object
@@ -3505,6 +4747,10 @@ components:
           type: string
           description: Identifier used to apply specific rules when Carrier, Service and Cost Center are to be autoassigned
           example: 'frozen'
+        freeLabelText:
+          type: string
+          description: Custom text for print in the label
+          example: 'Warehouse 45'
       description: 'Additional information, relevant for the cliente and/or Deliverea but not sent to the carrier'
       example:
         category: 'frozen'
@@ -3512,221 +4758,179 @@ components:
     Bulky:
       type: object
       properties:
-        incotermLocation:
-          type: string
-          description: Intercom Location code
-          example: 'DAP'
+        incoterm:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Incoterm code
+              example: 'DAP'
+            location:
+              type: string
+              description: Incoterm Location
+              example: 'Warehouse 2'
+            zipCode:
+              type: string
+              description: Incoterm zipCode
+              example: '08005'
         containerNumber:
           type: string
           description: Number or identifier of the container
           example: '1230B'
-      description: 'Parameters necessary for bulky type shipments'
+      description: 'Parameters for bulky type shipments'
       example:
-        incotermLocation: 'DAP'
+        incoterm:
+          code: 'DAP'
+          location: 'Warehouse 2'
+          zipCode: '08005'
         containerNumber: '1230B'
 
-    ########################
-    # Criteria
-    ########################
-    ShipmentCriteria:
-      type: object
-      required:
-        - carrierCode
-        - serviceCode
-        - costCenter
-        - delivereaReference
-        - clientReference
-      properties:
-        carrierCode:
-          type: string
-          nullable: true
-          description: Carrier to be used when creating the shipment
-          example: dummy
-        serviceCode:
-          type: string
-          nullable: true
-          description: Service to be used when creating the shipment
-          example: standard
-        costCenter:
-          type: string
-          nullable: true
-          description: Alias identifier of the cost center
-          default: DEFAULT
-        clientReference:
-          description: Filter by exact clientReference
-          type: string
-          example: REF0123456789
-        delivereaReference:
-          description: Filter by exact delivereaReference
-          type: string
-          example: D5312427d7f72b0
-        fromShippingDate:
-          description: From shipping date starting at
-          type: string
-          example: '2022-03-05'
-          format: YYYY-MM-DD
-        toShippingDate:
-          description: To shipping date ending at
-          type: string
-          format: YYYY-MM-DD
-          example: '2022-03-10'
-        carrierReference:
-          type: string
-          description: Unique carrier reference
-          example: CAR987654321
-        status:
-          $ref: '#/components/schemas/Status'
-        lastTrackingCode:
-          description: Filter by last status codes
-          type: string
-          example: '11'
-        toName:
-          description: Name of the recipient (like)
-          type: string
-          example: 'John D'
-        toZipCode:
-          description: Destination zip code
-          type: string
-          example: '08005'
-        toCountryCode:
-          description: Destination country code
-          type: string
-          example: 'ES'
-        cashOnDelivery:
-          description: Wether or not the expedition includes cash on delivery
-          type: number
-          enum:
-            [0,1]
-          example: 1
-
-    ReturnCriteria:
+    CarrierDocumentationErrorProperties:
       type: object
       properties:
-        carrierCode:
-          type: string
-          nullable: true
-          description: Carrier to be used when creating the shipment
-          example: dummy
-        serviceCode:
-          type: string
-          nullable: true
-          description: Service to be used when creating the shipment
-          example: standard
-        costCenter:
-          type: string
-          nullable: true
-          description: Alias identifier of the cost center
-          default: DEFAULT
-        clientReference:
-          description: Filter by exact clientReference
-          type: string
-          example: REF0123456789
-        delivereaReference:
-          description: Filter by exact delivereaReference
-          type: string
-          example: D5312427d7f72b0
-        fromShippingDate:
-          description: From shipping date starting at
-          type: string
-          example: '2022-03-05'
-          format: YYYY-MM-DD
-        toShippingDate:
-          description: To shipping date ending at
-          type: string
-          format: YYYY-MM-DD
-          example: '2022-03-10'
-        carrierReference:
-          type: string
-          description: Unique carrier reference
-          example: CAR987654321
-        status:
-          $ref: '#/components/schemas/Status'
-        lastTrackingCode:
-          description: Filter by last status codes
-          type: string
-          example: '11'
-        fromName:
-          description: Name of the sender (like)
-          type: string
-          example: 'John D'
-        fromZipCode:
-          description: Destination zip code
-          type: string
-          example: '08005'
-        fromCountryCode:
-          description: Destination country code
-          type: string
-          example: 'ES'
+        error:
+          required:
+            - code
+            - message
+          type: object
+          properties:
+            code:
+              type: string
+              example: 'CE0130'
+            message:
+              type: string
+              description: Error info
+              example: 'The carrier token credential is invalid'
+            carrierCode:
+              type: string
+              description: Error code coming from the carrier
+              example: 'AUTHERR1'
+            carrierMessage:
+              type: string
+              description: Error info coming from the carrier
+              example: 'The token is invalid'
 
-    OrderCriteria:
+    MissingOrInvalidFieldsProperties:
       type: object
-      required:
-        - carrierCode
-        - serviceCode
-        - costCenter
       properties:
-        carrierCode:
-          type: string
-          nullable: true
-          description: Carrier to be used when creating the shipment
-          example: dummy
-        serviceCode:
-          type: string
-          nullable: true
-          description: Service to be used when creating the shipment
-          example: standard
-        costCenter:
-          type: string
-          nullable: true
-          description: Alias identifier of the cost center
-          default: DEFAULT
-        clientReference:
-          description: Filter by exact clientReference
-          type: string
-          example: REF0123456789
-        delivereaReference:
-          description: Filter by exact delivereaReference
-          type: string
-          example: D5312427d7f72b0
-        fromShippingDate:
-          description: From shipping date starting at
-          type: string
-          example: '2022-03-05'
-          format: YYYY-MM-DD
-        toShippingDate:
-          description: To shipping date ending at
-          type: string
-          format: YYYY-MM-DD
-          example: '2022-03-10'
-        orderStatus:
-          description: Order status
-          type: string
-          example: 'pending'
-
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: 'VE0900'
+            message:
+              type: string
+              description: Error info
+              example: 'X required field is missing | Format of field X is invalid'
 
     ########################
     # ATOMS
     ########################
+    CreatedAtDate:
+      allOf:
+        - $ref: '#/components/schemas/Date'
+        - nullable: false
+        - description: Date and time when the expedition was entered into Deliverea's systems
+    ShippingDate:
+      allOf:
+        - $ref: '#/components/schemas/Date'
+        - nullable: false
+        - description: Date when the expedition is to be shipped
+        - nullable: false
+      type: string
+      nullable: false
+      description: Date of the  (format YYYY-MM-DD)
+    DeliveryDate:
+      allOf:
+        - $ref: '#/components/schemas/Date'
+        - nullable: true
+        - description: Date in which shipment was delivered
+
+
+    TotalAmount:
+      allOf:
+        - $ref: '#/components/schemas/Price'
+        - description: Total amount or price of the expedition articles (required for crossborder internationa expeditions if no amount by parcel[items] is present)
+        - nullable: true
 
     Status:
       type: string
       description: Expedition status
       enum:
-        [documented, draft, error, cancelled]
+        [
+          'draft',
+          'active',
+          'finalized',
+          'error',
+          'cancelled',
+          'hidden',
+          'expired',
+          'finalized',
+          'closed',
+        ]
       example:
-        documented
+        active
 
     OrderStatus:
       type: string
       enum: [
-        draft,
-        pending,
-        documented,
-        error_documented
+        'pending_draft',
+        'error_drafting',
+        'draft',
+        'pending',
+        # 'documented',
+        'error_documented',
+        # 'canceled',
       ]
       example:
         'pending'
 
+    TrackingCodes:
+      type: string
+      enum: [
+        '01',
+        '02',
+        '03',
+        '04',
+        '05',
+        '06',
+        '07',
+        '08',
+        '09',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '21',
+        '22',
+        '23',
+        '24',
+        '25',
+        '26',
+        '27',
+        '28',
+        '29',
+        '30',
+        '31',
+        '32',
+        '35',
+        '36',
+        '37',
+        '38',
+        '39',
+        '40',
+        '99',
+      ]
+      example:
+        '11'
 
     Price:
       type: string
@@ -3751,40 +4955,479 @@ components:
         - hourStart: '2021-01-03T10:00:54+0100'
         - hourEnd: '2021-01-03T13:00:54+0100'
 
+    ExpeditionDetailsLabel:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [pdf, zpl]
+          example: 'pdf'
+        source:
+          type: string
+          enum: [carrier,label-engine]
+          example: 'carrier'
+
     Date:
       type: string
       format: 'ISO-8601 (YYYY-MM-DDThh:mm:ssZ)'
       example: '2021-01-03T13:00:54+0100'
 
-    labelType:
+    Uuid:
       type: string
-      enum: [pdf, zpl]
-      example:
-        'pdf'
-    labelTypes:
-      type: array
-      items:
-        $ref: '#/components/schemas/labelType'
-      example: [pdf,zpl]
+      format: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+      example: '966e22ec-6cfa-11ea-bae6-026b033c7ea0'
 
-    labelSource:
-      type: string
-      enum: [carrier,label-engine]
-      example:
-        'carrier'
-    labelSources:
-      type: array
-      items:
-        $ref: '#/components/schemas/labelSource'
-      example: [carrier,label-engine]
-
-    credentialField:
+    ReturnsWebPortalConfiguration:
       type: object
-      description: Credential to be configured for using the carrier
       properties:
-        key:
+        active:
+          type: boolean
+          nullable: false
+          description: 'Active or not'
+          example: true
+        subdomain:
           type: string
-          example: userName
-        name:
+          nullable: true
+          description: 'Returns webportal subdomain (https://mysubdomain.returnorder.io)'
+          example: 'mysubdomain'
+        color:
           type: string
-          example: User
+          nullable: true
+          description: 'Hexadecimal code color'
+          example: '#D62424'
+        senderId:
+          type: string
+          description: 'Sender email identifier that will be the sender of the advanced tracking communications'
+          example: '49030f12-79e6-4e1f-9e3d-b3f6774d742b'
+        notificationEmail:
+          type: string
+          format: email
+          nullable: true
+          description: Email that will be CC'd when a return es created
+          example: support@mydomain.com
+        notificationOn:
+          type: boolean
+          nullable: false
+          description: Activate/deactivate CC'ing the notification email
+          example: true
+        policyDays:
+          type: number
+          nullable: false
+          default: 15
+          description: Peiod in days when the client will be able to demand a return
+          example: 15
+        policyUrl:
+          type: string
+          nullable: true
+          format: url
+          description: Link to return policies information
+          example: https://mydomain.com/return-policy
+        exitLink:
+          type: string
+          nullable: true
+          format: url
+          description: Link where the customer will be redirected after the return demand is completed
+          example: https://mydomain.com/exit-link
+
+    Rule:
+      allOf:
+        - $ref: '#/components/schemas/RulesConfiguration'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+
+    RulesConfiguration:
+      type: object
+      properties:
+        alias:
+          type: string
+          nullable: false
+          description: 'Define an alias for the rule'
+        conditions:
+          type: object
+          nullable: false
+          properties:
+            to:
+              type: object
+              nullable: true
+              properties:
+                country:
+                  $ref: '#/components/schemas/ToCountryCondition'
+                zipCode:
+                  $ref: '#/components/schemas/ToPostalCodeCondition'
+            from:
+              type: object
+              nullable: true
+              properties:
+                country:
+                  $ref: '#/components/schemas/ToCountryCondition'
+                zipCode:
+                  $ref: '#/components/schemas/ToPostalCodeCondition'
+            category:
+              $ref: '#/components/schemas/CategoryCondition'
+            expeditionType:
+              $ref: '#/components/schemas/ExpeditionTypeCondition'
+            sku:
+              $ref: '#/components/schemas/SkuCondition'
+            totalPrice:
+              $ref: '#/components/schemas/TotalPriceCondition'
+            weight:
+              $ref: '#/components/schemas/WeightCondition'
+            cashOnDelivery:
+              $ref: '#/components/schemas/CashOnDeliveryCondition'
+        actions:
+          type: object
+          nullable: false
+          properties:
+            assignation:
+              $ref: '#/components/schemas/AssignationAction'
+        enable:
+          type: boolean
+          nullable: false
+          example: true
+          description: 'The status of the new rule'
+        priority:
+          type: number
+          nullable: false
+          example: 1
+          description: 'The priority of the new rule when compare with others rules'
+        distributionCenterId:
+          type: string
+          description: UUID identifier of the dictribution center
+          example: 966e4225-6cfa-11ea-bae6-026b033c7ea0
+        module:
+          type: string
+          enum:
+            - 'general'
+            - 'returns'
+          example: 'general'
+          nullable: true
+          description: 'Optional field by default general'
+        pickupType:
+          type: string
+          enum:
+            - 'pickup'
+            - 'droppoint'
+          nullable: true
+          description: 'Define the type of pickup'
+          example: 'pickup'
+
+    RulesUpdateConfiguration:
+      type: object
+      properties:
+        alias:
+          type: string
+          nullable: false
+          description: 'Define an alias for the rule'
+        conditions:
+          type: object
+          nullable: false
+          properties:
+            to:
+              type: object
+              nullable: true
+              properties:
+                country:
+                  $ref: '#/components/schemas/ToCountryCondition'
+                zipCode:
+                  $ref: '#/components/schemas/ToPostalCodeCondition'
+            from:
+              type: object
+              nullable: true
+              properties:
+                country:
+                  $ref: '#/components/schemas/ToCountryCondition'
+                zipCode:
+                  $ref: '#/components/schemas/ToPostalCodeCondition'
+            category:
+              $ref: '#/components/schemas/CategoryCondition'
+            expeditionType:
+              $ref: '#/components/schemas/ExpeditionTypeCondition'
+            sku:
+              $ref: '#/components/schemas/SkuCondition'
+            totalPrice:
+              $ref: '#/components/schemas/TotalPriceCondition'
+            weight:
+              $ref: '#/components/schemas/WeightCondition'
+            cashOnDelivery:
+              $ref: '#/components/schemas/CashOnDeliveryCondition'
+            pickupType:
+              $ref: '#/components/schemas/PickupTypeCondition'
+        actions:
+          type: object
+          nullable: false
+          properties:
+            assignation:
+              $ref: '#/components/schemas/AssignationAction'
+        enable:
+          type: boolean
+          nullable: false
+          example: true
+          description: 'The status of the new rule'
+        priority:
+          type: number
+          nullable: false
+          example: 1
+          description: 'The priority of the new rule when compare with others rules'
+
+    RulesMatch:
+      type: object
+      properties:
+        to:
+          type: object
+          nullable: true
+          properties:
+            country:
+              type: string
+              description: 'The country code of the expedition'
+              example: 'ES'
+            zipCode:
+              type: string
+              description: 'The postal code of the expedition'
+              example: '03510'
+        category:
+          type: string
+          description: 'The category of the expeditions products'
+          example: 'Electronics'
+        distributionCenterId:
+          type: string
+          description: 'The ID of the selected distribution center'
+          format: uuid
+          example: '9be66fcc-593e-4a0c-b5b7-af086dd99506'
+        expeditionType:
+          type: string
+          description: 'The type of the expedition'
+          enum:
+            - 'shipment'
+            - 'return'
+          example: 'return'
+        cashOnDelivery:
+          type: boolean
+          description: 'If the order is paid by cash on delivery'
+          example: false
+        totalPrice:
+          type: string
+          description: 'The total price of the expedition in dot separated decimal'
+          example: '10.93'
+        weight:
+          type: number
+          description: 'The weight of the expedition'
+          example: 100
+        module:
+          type: string
+          enum:
+            - 'general'
+            - 'returns'
+          example: 'general'
+          nullable: true
+          description: 'Optional field by default general'
+
+    ##########################
+    # ActionsRules
+    ##########################
+    AssignationAction:
+      type: object
+      properties:
+        carrier:
+          type: string
+          example: 'dummy'
+          description: 'The name of the carrier'
+        ceco:
+          type: string
+          example: 'DEFAULT'
+          description: 'The client account for the selected carrier'
+        service:
+          type: string
+          example: 'same-day'
+          description: 'The service of the selected carrier'
+
+    ##########################
+    # ConditionsRules
+    ##########################
+    ToCountryCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+            - 'in'
+        value:
+          type: string
+          description: 'The code of the country'
+          example: "ES"
+
+    ToPostalCodeCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+            - 'in'
+            - 'starts_with'
+        value:
+          type: string
+          description: 'The postal code'
+          example: "08029"
+
+    CategoryCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+            - 'in'
+        value:
+          type: string
+          description: 'The category name'
+          example: 'Electronics'
+
+    ExpeditionTypeCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+            - 'in'
+        value:
+          type: string
+          description: 'The type of the expedition'
+          enum:
+            - 'shipment'
+            - 'return'
+
+    SkuCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+            - 'in'
+            - 'starts_with'
+            - 'ends_with'
+            - 'contains'
+        value:
+          type: string
+          description: 'The SKU of product'
+
+    TotalPriceCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equal_to'
+            - 'greater_than'
+            - 'greater_than_equal_to'
+            - 'less_than'
+            - 'less_than_equal_to'
+            - 'between'
+        value:
+          type: number
+          description: 'The price of the send'
+          example: 10.20
+
+    WeightCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equal_to'
+            - 'greater_than'
+            - 'greater_than_equal_to'
+            - 'less_than'
+            - 'less_than_equal_to'
+            - 'between'
+        value:
+          type: number
+          description: 'The weight in KG'
+          example: 25
+
+    CashOnDeliveryCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+        value:
+          type: string
+          description: 'A boolean condition for represent if the shipping is cash on delivery'
+          enum:
+            - 'true'
+            - 'false'
+
+    PickupTypeCondition:
+      type: object
+      nullable: true
+      properties:
+        type:
+          type: string
+          description: 'The comparator for evaluate the condition'
+          enum:
+            - 'equals'
+            - 'not_equals'
+        value:
+          type: string
+          description: 'The type of the pickup'
+          enum:
+            - 'pickup'
+            - 'droppoint'
+
+
+    TrackingsWebhookConfiguration:
+      type: object
+      properties:
+        active:
+          type: boolean
+          nullable: false
+          description: 'Active or not'
+          example: true
+        credentials:
+          type: object
+          properties:
+            user:
+              type: string
+              nullable: false
+              description: Basic auth username of the webhook provided
+              example: 'username'
+            password:
+              type: string
+              nullable: false
+              description: Basic auth password of the webhook provided
+              example: 'password'
+        url:
+          type: string
+          nullable: false
+          format: url
+          description: Endpoint the tracking updates will be posted to
+          example: https://mydomain.com/my-trackings-webhook
