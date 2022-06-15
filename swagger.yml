@@ -2411,6 +2411,106 @@ paths:
         403:
           $ref: '#/components/responses/UserDoesNotBelongToDistributionCenterError'
 
+  /v3/address-validation:
+    get:
+      tags:
+        - Address Validation and Geolocation
+      parameters:
+        - in: query
+          name: street
+          schema:
+            type: string
+            example: Carrer Llauder
+          required: true
+          description: Street name (refer from including number, floor or door information)
+        - in: query
+          name: number
+          schema:
+            type: string
+            example: 1
+          required: false
+          description: House number (refer from including floor or door information)
+        - in: query
+          name: city
+          schema:
+            type: string
+            example: Barcelona
+          required: false
+          description: Locality
+        - in: query
+          name: zipCode
+          schema:
+            type: string
+            example: 08003
+          required: true
+          description: Zip code
+        - in: query
+          name: countryCode
+          schema:
+            type: string
+            example: ES
+          required: true
+          description: Country code in ISO format 3166-1-alpha-2
+      security:
+        - basicAuth: []
+      summary: Validates that the address passed exists and is correct. If correct, the address will be returned normalized including Geolocation.
+      responses:
+        200:
+          description: Valid match
+          content:
+            application/json:
+              schema:
+                properties:
+                  match:
+                    $ref: '#/components/schemas/Match'
+                  address:
+                    type: object
+                    properties:
+                      street:
+                        type: number
+                        description: Normalized street name, not including number, floor or door information
+                        example: Carrer Llauder
+                      number:
+                        type: string
+                        description: House number
+                        example: 1
+                      city:
+                        type: string
+                        description: Locality's name
+                        example: Barcelona
+                      zipCode:
+                        type: string
+                        description: Postal code of the municipality
+                        example: 08003
+                      countryCode:
+                        type: string
+                        description: Country code in ISO format 3166-1-alpha-2
+                        example: ES
+                      country:
+                        type: string
+                        description: Last number of the range configurd
+                        example: Spain
+                      latitude:
+                        type: number
+                        description: Latitude
+                        example: 41.3816785
+                      longitude:
+                        type: number
+                        description: Longitude
+                        example: 2.180848
+
+        404:
+          description: Match not found
+          content:
+            application/json:
+              schema:
+                properties:
+                  match:
+                    allOf:
+                      - $ref: '#/components/schemas/Match'
+                      - example: none
+                  address:
+                    example: null
 
 components:
   securitySchemes:
@@ -5431,3 +5531,14 @@ components:
           format: url
           description: Endpoint the tracking updates will be posted to
           example: https://mydomain.com/my-trackings-webhook
+
+    Match:
+      type: string
+      description: Wheter the match found is "exact" (coincidence found with 100% confidence), "bestEffort" (coincidence found with high confidence) or "none" (no coincidence found)
+      enum: [
+        'exact',
+        'bestEffort',
+        'none',
+      ]
+      example:
+        'exact'
