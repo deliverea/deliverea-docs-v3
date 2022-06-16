@@ -3162,10 +3162,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/OrderSearchResult'
-              count:
-                type: number
-                description: Total number of orders that match the query
-                example: 1
+              hasMore:
+                type: boolean
+                description: Indicates if there are more records in the search
+                example: true
 
     SearchShipmentsResponse:
       description: 'Search shipments response'
@@ -3177,10 +3177,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/ShipmentsSearchResult'
-              count:
-                type: number
-                description: Total number of shipments that match the query
-                example: 1
+              hasMore:
+                type: boolean
+                description: Indicates if there are more records in the search
+                example: true
 
     SearchReturnsResponse:
       description: 'Search returns response'
@@ -3192,10 +3192,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReturnsSearchResult'
-              count:
-                type: number
-                description: Total number of returns that match the query
-                example: 1
+              hasMore:
+                type: boolean
+                description: Indicates if there are more records in the search
+                example: true
 
     GetShipmentResponse:
       description: 'Shipment response'
@@ -4733,10 +4733,11 @@ components:
           description: Description of the items (required for cross-border international shipments)
           example: "Black shoes size 42"
         amount:
-          allOf:
-            - $ref: '#/components/schemas/Price'
-            - description: Value or price per item (required for cross-border international shipments)
-            - nullable: true
+          type: string
+          example: "50.2 EUR"
+          format: 'Amount with up-to 3 digits after decimal separator + ISO 4217 currency code'
+          description: Value or price per item (required for cross-border international shipments)
+          nullable: true
         units:
           type: number
           nullable: false
@@ -4748,23 +4749,22 @@ components:
           nullable: true
           description: Code of the manufacturing country in ISO format 3166-1-alpha-2
           example: ES
-          default: from.countryCode
           # tariffCode:
           # type: string
           # nullable: true
           # description: Customs code of the item according to [TARIC](https://ec.europa.eu/taxation_customs/business/calculation-customs-duties/customs-tariff/eu-customs-tariff-taric_en)
           # example: ES
-          # default: from.countryCode
 
     ServiceAttributes:
       type: object
       description: 'Additional service attributes. Availability depends on the carrier and service.'
       properties:
         cashOnDelivery:
-          allOf:
-            - $ref: '#/components/schemas/Price'
-            - description: Cash on delivery amount
-            - nullable: true
+          type: string
+          example: "50.2 EUR"
+          format: 'Amount with up-to 3 digits after decimal separator + ISO 4217 currency code'
+          description: Cash on delivery amount
+          nullable: true
         dropPointKey:
           type: string
           nullable: true
@@ -4816,10 +4816,11 @@ components:
           description: Whether or not to hide sender information in the printed label (availability depends on carrier and service)
           example: false
         insuranceValue:
-          allOf:
-            - $ref: '#/components/schemas/Price'
-            - description: Amount of the expedition insurance (necessary for expedition with insurance, availability depends on carrier and service)
-            - nullable: true
+          type: string
+          example: "50.2 EUR"
+          format: 'Amount with up-to 3 digits after decimal separator + ISO 4217 currency code'
+          description: Amount of the expedition insurance (necessary for expedition with insurance, availability depends on carrier and service)
+          nullable: true
       example:
         saturdayDelivery: true
         carrierNotifications:
@@ -4949,10 +4950,11 @@ components:
 
 
     TotalAmount:
-      allOf:
-        - $ref: '#/components/schemas/Price'
-        - description: Total amount or price of the expedition articles (required for crossborder internationa expeditions if no amount by parcel[items] is present)
-        - nullable: true
+      type: string
+      example: "50.2 EUR"
+      format: 'Amount with up-to 3 digits after decimal separator + ISO 4217 currency code'
+      description: Total amount or price of the expedition articles (required for crossborder internationa expeditions if no amount by parcel[items] is present)
+      nullable: true
 
     Status:
       type: string
