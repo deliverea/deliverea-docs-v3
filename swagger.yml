@@ -1221,7 +1221,7 @@ paths:
   /v3/shipments/manifests:
     post:
       tags:
-        - Shipments
+        - Manifests
       parameters:
         - in: query
           name: carrierCode
@@ -1268,7 +1268,7 @@ paths:
   /v3/shipments/exports:
     post:
       tags:
-        - Shipments
+        - Exports
       security:
         - basicAuth: []
       summary: Export shipments data to file
@@ -1660,7 +1660,7 @@ paths:
   /v3/returns/exports:
     post:
       tags:
-        - Returns
+        - Exports
       security:
         - basicAuth: []
       summary: Export returns data to file
