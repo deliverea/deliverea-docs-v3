@@ -5658,6 +5658,7 @@ components:
           example: dummy
         supportedCountries:
           type: array
+          items:
             type: string
             description: Countries the carrier can ship from
             example: ES
