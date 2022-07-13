@@ -1303,7 +1303,7 @@ paths:
         - Exports
       security:
         - basicAuth: []
-      summary: Export shipments data to file
+      summary: Export order data to file
       requestBody:
         description: 'Export request'
         content:
