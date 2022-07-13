@@ -331,6 +331,37 @@ paths:
           $ref: '#/components/responses/NotFound'
 
 
+  /v3/carriers/{carrierCode}/integrations/{integrationCode}:
+    get:
+      tags:
+        - Carriers and services
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: carrierCode
+          schema:
+            type: string
+          required: true
+          description: Code identifier of the Carrier
+        - in: path
+          name: integrationCode
+          schema:
+            type: string
+          required: true
+          description: Code identifier of the Integration
+      summary: Get details for a particular carrier integration
+      responses:
+        200:
+          description:  Integration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
+
+        404:
+          $ref: '#/components/responses/NotFound'
+
   ### Cost Centers ###
   /v3/distribution-centers/{distributionCenterId}/carriers/{carrierCode}/cost-centers:
     post:
@@ -835,7 +866,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'Parcel number out of the total of the the order, (ex: 1, 2, 3...)'
+          description: 'Parcel number out of the total of the order, (ex: 1, 2, 3...)'
       security:
         - basicAuth: []
       summary: Generate parcel label with engine
@@ -1262,6 +1293,112 @@ paths:
           $ref: '#/components/responses/GenerateManifestResponse'
         404:
           $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/MissingOrInvalidFields'
+
+
+  /v3/orders/exports:
+    post:
+      tags:
+        - Exports
+      security:
+        - basicAuth: []
+      summary: Export shipments data to file
+      requestBody:
+        description: 'Export request'
+        content:
+          application/json:
+            schema:
+              required:
+                - destination
+                - format
+                - criteria
+              properties:
+                destination:
+                  type: string
+                  nullable: false
+                  description: Email where the export will be sent
+                  example: contact@email.com
+                format:
+                  type: string
+                  enum: [xlsx, csv]
+                  nullable: false
+                  description: Format of the file exported
+                  example: xlsx
+                criteria:
+                  type: object
+                  properties:
+                    carrierCode:
+                      type: string
+                      description: Carrier used when creating the shipment
+                      example: dummy
+                    serviceCode:
+                      type: string
+                      description: Service used when creating the shipment
+                      example: standard
+                    costCenterCode:
+                      type: string
+                      description: Alias identifier of the cost center
+                      example: DEFAULT
+                    clientReference:
+                      type: string
+                      description: Filter by exact clientReference
+                      example: REF0123456789
+                    delivereaReference:
+                      type: string
+                      description: Filter by exact delivereaReference
+                      example: D5312427d7f72b0
+                    parcelClientCode:
+                      type: string
+                      description: Filter by exact parcelClientCode
+                      example: 100597501
+                    dropPointKey:
+                      type: string
+                      description: Filter by drop point key
+                      example: DP123456789
+                    countryCode:
+                      type: string
+                      description: Destination country code for shipment expeditions or origin country code for return expedition
+                      example: ES
+                    fromShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: From shipping date starting at
+                    toShippingDate:
+                      allOf:
+                        - $ref: '#/components/schemas/ShippingDate'
+                        - description: To shipping date ending at
+                    statuses:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/OrderStatus'
+                      description: Order statuses to filter
+                      example: ['draft','pending']
+                    distributionCenterIds:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Uuid'
+                      description: Uuids of the distribution centers to filter
+                      example: ['51453d83-8014-11ea-bae6-026b033c7ea0']
+                    fromCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date starting at
+                    toCreatedAtDate:
+                      allOf:
+                        - $ref: '#/components/schemas/CreatedAtDate'
+                        - description: From created at date ending at
+                    distributionCenterCountryCode:
+                      type: string
+                      description: Filter by distribution center's country
+                      example: ES
+                    billingAccountId:
+                      type: string
+                      description: Filter by billing account
+                      example: 7f601f2d-7654-4b1c-a41e-fa77ef21c9fb
+      responses:
+        202:
+          description: Accepted
         422:
           $ref: '#/components/responses/MissingOrInvalidFields'
 
@@ -3125,32 +3262,30 @@ components:
               - serviceCode
               - costCenterCode
             properties:
-              data:
-                type: object
-                properties:
-                  delivereaReference:
-                    type: string
-                    description: Unique deliverea reference
-                    example: D5312427d7f72b0
-                  carrierReference:
-                    type: string
-                    description: Unique carrier reference
-                    example: CAR987654321
-                  carrierCode:
-                    type: string
-                    nullable: true
-                    description: Carrier to be used when creating the shipment
-                    example: dummy
-                  serviceCode:
-                    type: string
-                    nullable: true
-                    description: Service to be used when creating the shipment
-                    example: standard
-                  costCenterCode:
-                    type: string
-                    nullable: true
-                    description: Alias identifier of the cost center
-                    default: DEFAULT
+              delivereaReference:
+                type: string
+                description: Unique deliverea reference
+                example: D5312427d7f72b0
+              carrierReference:
+                type: string
+                description: Unique carrier reference
+                nullable: true
+                example: CAR987654321
+              carrierCode:
+                type: string
+                nullable: true
+                description: Carrier to be used when creating the shipment
+                example: dummy
+              serviceCode:
+                type: string
+                nullable: true
+                description: Service to be used when creating the shipment
+                example: standard
+              costCenterCode:
+                type: string
+                nullable: true
+                description: Alias identifier of the cost center
+                default: DEFAULT
 
     SearchOrdersResponse:
       description: 'Search orders response'
@@ -3202,27 +3337,21 @@ components:
       content:
         application/json:
           schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/Shipment'
+            $ref: '#/components/schemas/Shipment'
 
     GetOrderResponse:
       description: 'Order response'
       content:
         application/json:
           schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/Order'
+            $ref: '#/components/schemas/Order'
 
     GetReturnResponse:
       description: 'Shipment response'
       content:
         application/json:
           schema:
-            properties:
-              data:
-                $ref: '#/components/schemas/Return'
+            $ref: '#/components/schemas/Return'
 
 
     LabelResponse:
@@ -3231,34 +3360,31 @@ components:
         application/json:
           schema:
             properties:
-              data:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    description: File type
-                    enum: [pdf,zpl]
-                    example: pdf
-                  content:
-                    type: string
-                    description: Base 64 encoded file
-                    example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
-                  delivereaReference:
-                    type: string
-                    description: Unique deliverea reference
-                    example: D5312427d7f72b0
-                  carrierReference:
-                    type: string
-                    description: Unique carrier reference
-                    example: CAR987654321
-                  clientReference:
-                    type: string
-                    description: Unique client reference
-                    example: REF0123456789
-                  carrierCode:
-                    type: string
-                    description: Error code coming from the carrier
-                    example: 20010
+              type:
+                type: string
+                description: File type
+                enum: [pdf,zpl]
+                example: pdf
+              content:
+                type: string
+                description: Base 64 encoded file
+                example: "JVBERi0xLjQKMyAwIG9iago8PC9UeXBlI..."
+              delivereaReference:
+                type: string
+                description: Unique deliverea reference
+                example: D5312427d7f72b0
+              carrierReference:
+                type: string
+                description: Unique carrier reference
+                example: CAR987654321
+              clientReference:
+                type: string
+                description: Unique client reference
+                example: REF0123456789
+              carrierCode:
+                type: string
+                description: Error code coming from the carrier
+                example: dummy
 
     GetExpeditionPodResponse:
       description: 'Label response'
@@ -3284,59 +3410,34 @@ components:
       content:
         application/json:
           schema:
-            properties:
-              data:
-                type: object
-                required:
-                  - delivereaReference
-                  - clientReference
-                properties:
-                  delivereaReference:
-                    type: string
-                    description: Unique deliverea reference
-                    example: D5312427d7f72b0
-                  carrierReference:
-                    type: string
-                    description: Unique carrier reference
-                    example: CAR987654321
-                  clientReference:
-                    type: string
-                    description: Unique client reference
-                    example: REF0123456789
-                  trackings:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        code:
-                          type: string
-                          description: Deliverea tracking code
-                          example: '05'
-                        message:
-                          type: string
-                          description: Deliverea description of the tracking code
-                          example: Picked up
-                        timestamp:
-                          type: number
-                          description: Timestamp of the tracking event
-                          example: 1647267147
-                        trackingLogs:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              message:
-                                type: string
-                                description: Carrier original message
-                                example: Collected in facilities
-                              timestamp:
-                                type: number
-                                description: Timestamp of the tracking event
-                                example: 1647267147
-                        createdAt:
-                          type: number
-                          description: Timestamp of the tracking creation
-                          example: 1647267147
+            type: array
+            items:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: Deliverea tracking code
+                  example: '05'
+                message:
+                  type: string
+                  description: Deliverea description of the tracking code
+                  example: Picked up
+                carrierCode:
+                  type: string
+                  description: The carrier tracking code
+                  example: 'SM001'
+                carrierMessage:
+                  type: string
+                  description: Carrier description of the tracking event
+                  example: Picked up
+                occurredAt:
+                  allOf:
+                    - $ref: '#/components/schemas/Date'
+                    - description: Date when the tracking event occurred
+                receivedAt:
+                  allOf:
+                    - $ref: '#/components/schemas/Date'
+                    - description: Date when the tracking event was registered in the Deliverea system
 
     GenerateManifestResponse:
       description: 'Generate manifest response'
@@ -3923,7 +4024,7 @@ components:
         labelTypes:
           $ref: '#/components/schemas/labelTypes'
         labelSources:
-          $ref: '#/components/schemas/labelSources'
+          $ref: '#/components/schemas/LabelSourceType'
 
     Service:
       type: object
@@ -3956,7 +4057,7 @@ components:
     labelSources:
       type: array
       items:
-        $ref: '#/components/schemas/labelSource'
+        $ref: '#/components/schemas/LabelSource'
       example: [carrier,label-engine]
 
     credentialField:
@@ -4713,7 +4814,7 @@ components:
         parcelNumber:
           type: string
           nullable: true
-          description: 'Parcel number out of the total of the the order, (ex: 1, 2, 3...)'
+          description: 'Parcel number out of the total of the order, (ex: 1, 2, 3...)'
         items:
           type: array
           items:
@@ -5544,3 +5645,75 @@ components:
       ]
       example:
         'exact'
+
+    Integration:
+      type: object
+      description: Carrier integration details
+      properties:
+        code:
+          type: string
+          example: es-v1
+        carrierCode:
+          type: string
+          example: dummy
+        supportedCountries:
+          type: array
+            type: string
+            description: Countries the carrier can ship from
+            example: ES
+          example: ['ES']
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        supportedFeatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationFeature'
+        supportedLabelSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabelSource'
+        credentialsFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationCredentialsField'
+
+
+    IntegrationFeature:
+      type: string
+      enum:
+        - preDocumentExpedition
+        - documentExpedition
+        - cancelExpedition
+        - getProofOfDelivery
+        - getLabel
+        - getCutOffHours
+        - getDropPoints
+      example: documentExpedition
+
+    IntegrationCredentialsField:
+      type: object
+      properties:
+        key:
+          type: string
+          example: username
+        label:
+          type: string
+          example: Username
+
+    LabelSource:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/LabelSourceType'
+        supportedLabelTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/labelType'
+
+    LabelSourceType:
+      type: string
+      enum: [carrier,label-engine]
+      example:
+        'carrier'
