@@ -2785,7 +2785,6 @@ components:
               - to
               - carrierCode
               - serviceCode
-              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -2806,7 +2805,7 @@ components:
               costCenterCode:
                 type: string
                 nullable: true
-                description: Alias identifier of the cost center
+                description: Alias identifier of the cost center, if none set DEFAULT will be assumed
                 default: DEFAULT
               distributionCenterId:
                 type: string
@@ -2829,7 +2828,7 @@ components:
               parcels:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Parcel'
+                  $ref: '#/components/schemas/ParcelRequest'
               serviceAttributes:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
@@ -2853,7 +2852,7 @@ components:
               parcels:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Parcel'
+                  $ref: '#/components/schemas/ParcelRequest'
               serviceAttributes:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
@@ -2868,7 +2867,6 @@ components:
               - to
               - carrierCode
               - serviceCode
-              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -2889,7 +2887,7 @@ components:
               costCenterCode:
                 type: string
                 nullable: true
-                description: Alias identifier of the cost center
+                description: Alias identifier of the cost center, if none set DEFAULT will be assumed
                 default: DEFAULT
               distributionCenterId:
                 type: string
@@ -2912,7 +2910,7 @@ components:
               parcels:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Parcel'
+                  $ref: '#/components/schemas/ParcelRequest'
               serviceAttributes:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
@@ -2931,7 +2929,6 @@ components:
               - from
               - carrierCode
               - serviceCode
-              - costCenterCode
               - clientReference
               - shippingDate
               - distributionCenterId
@@ -2952,7 +2949,7 @@ components:
               costCenterCode:
                 type: string
                 nullable: true
-                description: Alias identifier of the cost center
+                description: Alias identifier of the cost center, if none set DEFAULT will be assumed
                 default: DEFAULT
               distributionCenterId:
                 type: string
@@ -2975,7 +2972,7 @@ components:
               parcels:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Parcel'
+                  $ref: '#/components/schemas/ParcelRequest'
               serviceAttributes:
                 $ref: '#/components/schemas/ServiceAttributes'
               clientAdditionalInfo:
@@ -4720,6 +4717,49 @@ components:
           description: Longitude
           example: 2.180848
 
+    ParcelRequest:
+      type: object
+      required:
+        - weight
+        - height
+        - width
+        - length
+      properties:
+        weight:
+          type: number
+          nullable: true
+          description: Parcel's height in Kg
+          example: 2
+        height:
+          type: number
+          nullable: false
+          description: Parcel's height in cm
+          example: 15
+        width:
+          type: number
+          nullable: false
+          description: Parcel's height in cm
+          example: 10
+        length:
+          type: number
+          nullable: false
+          description: Parcel's height in cm
+          example: 20
+        clientCode:
+          type: string
+          nullable: true
+          description: Unique numeric parcel identifier, provided by client and required for Label Engine flow
+          example: 123456
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParcelItem'
+        QR:
+          type: string
+          nullable: true
+          description: URL or string for create an QR code in the label
+          example: https://www.deliverea.com/
+
     Parcel:
       type: object
       required:
@@ -4751,12 +4791,12 @@ components:
         clientCode:
           type: string
           nullable: true
-          description: Unique numéric parcel identifier, provided by client and required for Label Engine flow
+          description: Unique numeric parcel identifier, provided by client and required for Label Engine flow
           example: 123456
         labelRangeCode:
           type: string
           nullable: true
-          description: Numéric label identifier assigned from the range configured for this carrier in the Label Engine Flow
+          description: Numeric label identifier assigned from the range configured for this carrier in the Label Engine Flow
           example: 100040789786
         labelBarcode:
           type: string
